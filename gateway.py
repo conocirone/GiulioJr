@@ -40,15 +40,11 @@ class Gateway:
             return board
         else:
             self.socket.close()
-            print("chiusa la connessione")
 
     def send_state(self, move):
-        start_pos, end_pos = move
-        turn = self.color
-
-        move_msg = {"from": move[0], "to": move[1], "turn": turn}
-        self.socket.send(struct.pack(">i", len(move)))
-        self.socket.send(move.encode())
+        move_msg = json.dumps({"from": move[0], "to": move[1], "turn": self.color})
+        self.socket.send(struct.pack(">i", len(move_msg)))
+        self.socket.send(move_msg.encode())
 
     def __recvall(self, n):
         # Helper function to recv n bytes or return None if EOF is hit
@@ -69,7 +65,4 @@ class Gateway:
     def read_msg(self, json_msg):
         msg = list(json_msg.items())
         board, turn = msg[0], msg[1]
-        print("ciao")
-        print(type(board), type(turn))
-        print(board[1], turn[1])
         return board[1], turn[1]

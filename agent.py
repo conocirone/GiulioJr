@@ -4,5 +4,4 @@ class Agent:
         self.gateway.set_agent(self)
         self.color = color
 
-        # while True:
-        self.gateway.get_state()
+        # sends and receives messages
