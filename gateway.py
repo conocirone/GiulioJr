@@ -1,6 +1,7 @@
 import json
 import socket
 import struct
+import sys
 
 
 class Gateway:
@@ -37,9 +38,10 @@ class Gateway:
         board, turn = self.read_msg(json_current_state_server)
 
         if not turn in ("WHITEWIN", "BLACKWIN", "DRAW"):
-            return board
+            return board, turn
         else:
             self.socket.close()
+            sys.exit("Connection closed by server")
 
     def send_state(self, move):
         move_msg = json.dumps({"from": move[0], "to": move[1], "turn": self.color})
