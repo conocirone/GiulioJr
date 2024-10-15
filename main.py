@@ -24,5 +24,5 @@ if __name__ == "__main__":
     )
     args = argparse.parse_args()
 
-    gateway = Gateway(args.team, args.name, args.timeout, args.ip)
-    Agent(gateway)
+    gateway = Gateway(args.team, args.name, args.ip)
+    Agent(gateway, args.timeout, args.team)

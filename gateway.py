@@ -4,12 +4,11 @@ import struct
 
 
 class Gateway:
-    def __init__(self, color, name, timeout, server_ip):
+    def __init__(self, color, name, server_ip):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         self.color = color
         self.name = name
-        self.timeout = timeout
         self.server_ip = server_ip
 
         # Connection
@@ -70,5 +69,7 @@ class Gateway:
     def read_msg(self, json_msg):
         msg = list(json_msg.items())
         board, turn = msg[0], msg[1]
-
-        return board, turn
+        print("ciao")
+        print(type(board), type(turn))
+        print(board[1], turn[1])
+        return board[1], turn[1]
