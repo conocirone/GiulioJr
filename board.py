@@ -1,7 +1,7 @@
 import numpy as np
 
 
-class BLACKoard:
+class Board:
     def __init__(self):
         self.__matrix = np.array(
             [
