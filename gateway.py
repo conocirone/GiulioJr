@@ -6,7 +6,6 @@ import struct
 class Gateway:
     def __init__(self, color, name, timeout, server_ip):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.converter = JsonConverter()
 
         self.color = color
         self.name = name
@@ -36,7 +35,7 @@ class Gateway:
         # Converting byte into json
         json_current_state_server = json.loads(current_state_server_bytes)
 
-        board, turn = self.converter.read_msg(json_current_state_server)
+        board, turn = self.read_msg(json_current_state_server)
 
         if not turn in ("WHITEWIN", "BLACKWIN", "DRAW"):
             return board
@@ -68,8 +67,6 @@ class Gateway:
     def set_agent(self, agent):
         self.agent = agent
 
-
-class JsonConverter:
     def read_msg(self, json_msg):
         msg = list(json_msg.items())
         board, turn = msg[0], msg[1]
