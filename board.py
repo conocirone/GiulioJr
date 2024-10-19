@@ -5,56 +5,53 @@ class Board:
     def __init__(self):
         self.__matrix = None
 
-    # Agent possible calls:
-    # get_available_move("WHITEKING")
-    # get_available_move("BLACK")
-    def get_available_moves(self, pieces):
-        moves = []  # (row_start, column_start, row_stop, j_stop)
+    def get_available_moves(self, color):
+        if color == "WHITE":
+            pieces = ["WHITE", "KING"]
+        else:
+            pieces = ["BLACK"]
+
+        moves = []  # (row_start, column_start, row_stop, column_stop)
         for i in range(9):
             for j in range(9):
                 if self.__matrix[i, j] in pieces:
                     # Horizontal backwards
                     for j_back in range(j - 1, -1, -1):
-                        if self.__matrix[i, j_back] == "EMPTY" and self.is_valid(
-                            i, j, i, j_back
-                        ):
+                        if self.is_valid(i, j, i, j_back):
                             moves.append((i, j, i, j_back))
                         else:
                             break
                     # Horizontal forward
                     for j_forward in range(j + 1, 9):
-                        if self.__matrix[i, j_forward] == "EMPTY" and self.is_valid(
-                            i, j, i, j_forward
-                        ):
+                        if self.is_valid(i, j, i, j_forward):
                             moves.append((i, j, i, j_forward))
                         else:
                             break
                     # Vertical backwards
                     for i_back in range(i - 1, -1, -1):
-                        if self.__matrix[i_back, j] == "EMPTY" and self.is_valid(
-                            i, j, i_back, j
-                        ):
+                        if self.is_valid(i, j, i_back, j):
                             moves.append((i, j, i_back, j))
                         else:
                             break
                     # Vertical forward
                     for i_forward in range(i + 1, 9):
-                        if self.__matrix[i_forward, j] == "EMPTY" and self.is_valid(
-                            i, j, i_forward, j
-                        ):
+                        if self.is_valid(i, j, i_forward, j):
                             moves.append((i, j, i_forward, j))
                         else:
                             break
         return moves
 
-    # function to update the state of the board
+    # Updates board state
     def update(self, board):
         self.__matrix = np.array(board)
-        print(self.__matrix)
 
+    # Checks if move is valid
     def is_valid(self, row_start, column_start, row_stop, column_stop):
-        # cittadels + throne
-        citadels = (
+        if self.__matrix[row_stop, column_stop] != "EMPTY":
+            return False
+
+        # camps + throne
+        non_enter_cells = (
             (0, 3),
             (0, 4),
             (0, 5),
@@ -73,8 +70,8 @@ class Board:
             (4, 7),
             (4, 4),
         )
-        if (row_stop, column_stop) in citadels:
-            if (row_start, column_start) in citadels:
+        if (row_stop, column_stop) in non_enter_cells:
+            if (row_start, column_start) in non_enter_cells:  # Black checker exception
                 return True
             else:
                 return False
