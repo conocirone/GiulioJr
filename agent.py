@@ -16,7 +16,7 @@ class Agent:
                 self.board.update(current_state)
 
                 # Define depth, timeout percentage
-                _ , move = self.alphabeta(depth=5, alpha=float("-inf"), beta=float("inf"), maximazingPlayer=True, time_limit=time.time() + self.timeout * 0.95) 
+                _ , move = self.alphabeta(self.board, depth=5, alpha=float("-inf"), beta=float("inf"), maximazingPlayer=True, time_limit=time.time() + self.timeout * 0.95) 
                 
                 """
                 moves = self.board.get_available_moves(self.color)
