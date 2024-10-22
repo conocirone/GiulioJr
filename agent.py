@@ -1,5 +1,4 @@
 import random
-import math
 import time
 
 class Agent:
@@ -15,11 +14,16 @@ class Agent:
             current_state, turn = gateway.get_state()
             if turn == self.color:
                 self.board.update(current_state)
+
+                # Define depth, timeout percentage
+                _ , move = self.alphabeta(depth=5, alpha=float("-inf"), beta=float("inf"), maximazingPlayer=True, time_limit=time.time() + self.timeout * 0.95) 
+                
+                """
                 moves = self.board.get_available_moves(self.color)
                 # Random agent
                 random_move = random.choice(moves)
-
-                conv_move = self.convert_move(random_move)
+                """
+                conv_move = self.convert_move(move)
                 self.gateway.send_state(conv_move)
 
     def convert_move(self, move):
@@ -31,16 +35,14 @@ class Agent:
         Returns:
             tuple: (starting_position, ending_position)
         """
-        return chr(move[1] + 97) + str(move[0] + 1), chr(move[3] + 97) + str(
-            move[2] + 1
+        return chr(move[1] + 97) + str(move[0] + 1), chr(move[3] + 97) + str(move[2] + 1
         )
     
     
     def alphabeta(state, depth, alpha, beta, maximazingPlayer, time_limit):
         if depth == 0 and time.time() >= time_limit:
             value = eval(state)
-            #put this value into a transposition table
-            return value
+            return value, None
         
         oppositeColor = ''
         if self.color == "WHITE":
@@ -48,32 +50,39 @@ class Agent:
         else: 
             oppositeColor = "WHITE"
         
-                
-        if(maximazingPlayer):
+        bestMove = None
+        if maximazingPlayer:
             bestValue = float('-inf')
-            for move in state.get_available_moves(oppositeColor):
+            for move in state.get_available_moves(oppositeColor): # TODO: Order moves
                 s = do_move(state, move)
-                value = alphabeta(s, depth - 1, alpha, beta, False)
-                bestValue = max(bestValue, value)
-                alpha = max(alpha, bestValue)
+                value, move2 = alphabeta(s, depth - 1, alpha, beta, False)
+                if value > bestValue:
+                    bestValue = value
+                    bestMove = move2
+                    alpha = max(alpha, bestValue)
                 if bestValue >= beta:
-                    return bestValue, move
-            return bestValue, move
+                    return bestValue, bestMove
+            return bestValue, bestMove
         else:
             bestValue = float('inf')
             for move in state.get_available_moves(oppositeColor):
                 s = do_move(state, move)
-                value = alphabeta(s, depth - 1, alpha, beta, True)
-                bestValue = min(bestValue, value)
-                beta = min(beta, bestValue)
+                value, move2 = alphabeta(s, depth - 1, alpha, beta, True)
+                if value < bestValue:
+                    bestValue = value
+                    bestMove = move2
+                    beta = min(beta, bestValue)
                 if bestValue <= alpha:
-                    return bestValue, move
-            return bestValue, move        
+                    return bestValue, bestMove
+            return bestValue, bestMove        
         
     def do_move(self, state, move):
         new_board = state.copy()
         new_board.move_piece(move)
         return new_board
+    
+    def eval(state):
+        return random.randint(-5, 5)
         
 
             
