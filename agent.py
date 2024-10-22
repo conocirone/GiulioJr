@@ -55,7 +55,7 @@ class Agent:
             bestValue = float('-inf')
             for move in state.get_available_moves(oppositeColor): # TODO: Order moves
                 s = do_move(state, move)
-                value, move2 = alphabeta(s, depth - 1, alpha, beta, False)
+                value, move2 = alphabeta(s, depth - 1, alpha, beta, False, time_limit)
                 if value > bestValue:
                     bestValue = value
                     bestMove = move2
@@ -67,7 +67,7 @@ class Agent:
             bestValue = float('inf')
             for move in state.get_available_moves(oppositeColor):
                 s = do_move(state, move)
-                value, move2 = alphabeta(s, depth - 1, alpha, beta, True)
+                value, move2 = alphabeta(s, depth - 1, alpha, beta, True, time_limit)
                 if value < bestValue:
                     bestValue = value
                     bestMove = move2
