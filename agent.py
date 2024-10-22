@@ -39,7 +39,7 @@ class Agent:
         )
     
     
-    def alphabeta(state, depth, alpha, beta, maximazingPlayer, time_limit):
+    def alphabeta(self, state, depth, alpha, beta, maximazingPlayer, time_limit):
         if depth == 0 and time.time() >= time_limit:
             value = eval(state)
             return value, None
