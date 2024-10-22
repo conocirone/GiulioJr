@@ -77,3 +77,8 @@ class Board:
                 return False
         else:
             return True
+
+    def move_piece(self, move):
+        piece =  self.__matrix[move[0], move[1]]
+        self.__matrix[move[0], move[1]] = "EMPTY" 
+        self.__matrix[move[2], move[3]] = piece 
