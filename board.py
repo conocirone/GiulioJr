@@ -81,4 +81,4 @@ class Board:
     def move_piece(self, move):
         piece =  self.__matrix[move[0], move[1]]
         self.__matrix[move[0], move[1]] = "EMPTY" 
-        self.__matrix[move[2], move[3]] = piece 
+        self.__matrix[move[2], move[3]] = piece

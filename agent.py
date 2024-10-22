@@ -1,5 +1,6 @@
 import random
 import time
+import copy
 
 class Agent:
     def __init__(self, gateway, timeout, color, board):
@@ -16,7 +17,8 @@ class Agent:
                 self.board.update(current_state)
 
                 # Define depth, timeout percentage
-                _ , move = self.alphabeta(self.board, depth=5, alpha=float("-inf"), beta=float("inf"), maximazingPlayer=True, time_limit=time.time() + self.timeout * 0.95) 
+                _ , move = self.alphabeta(self.board, depth=10, alpha=float("-inf"), beta=float("inf"), maximazingPlayer=True, time_limit=time.time() + self.timeout * 0.95) 
+                
                 
                 """
                 moves = self.board.get_available_moves(self.color)
@@ -40,11 +42,12 @@ class Agent:
     
     
     def alphabeta(self, state, depth, alpha, beta, maximazingPlayer, time_limit):
-        if depth == 0 and time.time() >= time_limit:
-            value = eval(state)
+        print(f"board: {state}")
+        
+        if depth == 0 or time.time() >= time_limit:
+            value = self.eval(state)
             return value, None
         
-        oppositeColor = ''
         if self.color == "WHITE":
             oppositeColor = "BLACK"
         else: 
@@ -53,35 +56,40 @@ class Agent:
         bestMove = None
         if maximazingPlayer:
             bestValue = float('-inf')
-            for move in state.get_available_moves(oppositeColor): # TODO: Order moves
-                s = do_move(state, move)
-                value, move2 = alphabeta(s, depth - 1, alpha, beta, False, time_limit)
+            available_moves = state.get_available_moves(self.color)
+            print(f"Av moves max: {available_moves}")
+            for move in available_moves: # TODO: Order moves
+                s = self.do_move(state, move)
+                value, _ = self.alphabeta(s, depth - 1, alpha, beta, False, time_limit)
                 if value > bestValue:
                     bestValue = value
-                    bestMove = move2
+                    bestMove = move
                     alpha = max(alpha, bestValue)
                 if bestValue >= beta:
-                    return bestValue, bestMove
-            return bestValue, bestMove
+                    break
+            return bestValue, bestMove 
         else:
             bestValue = float('inf')
-            for move in state.get_available_moves(oppositeColor):
-                s = do_move(state, move)
-                value, move2 = alphabeta(s, depth - 1, alpha, beta, True, time_limit)
+            available_moves = state.get_available_moves(oppositeColor)
+            print(f"Av moves min: {available_moves}")
+            for move in available_moves:
+                s = self.do_move(state, move)
+                value, _ = self.alphabeta(s, depth - 1, alpha, beta, True, time_limit)
                 if value < bestValue:
                     bestValue = value
-                    bestMove = move2
+                    bestMove = move
                     beta = min(beta, bestValue)
                 if bestValue <= alpha:
-                    return bestValue, bestMove
-            return bestValue, bestMove        
+                    break
+            return bestValue, bestMove 
         
     def do_move(self, state, move):
-        new_board = state.copy()
+        new_board = copy.deepcopy(state)
         new_board.move_piece(move)
         return new_board
     
-    def eval(state):
+    def eval(self, state):
+        # TODO: implement
         return random.randint(-5, 5)
         
 
