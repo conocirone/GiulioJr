@@ -3,7 +3,7 @@ from random import randint
 
 class BoardHash:
     def __init__(self):
-        self.color_coords = {}
+        self.color_coords = defaultdict(set)
         self.coords_color = {}
 
     def get_available_moves(self, pieces):
@@ -52,6 +52,7 @@ class BoardHash:
 
     def update(self, board):
         self.color_coords = defaultdict(set)
+        self.coords_color = {}
         for i in range(9):
             for j in range(9):
                 if board[i][j] != 'EMPTY':
