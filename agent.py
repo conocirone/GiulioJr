@@ -90,12 +90,3 @@ class Agent:
     def eval(self, state):
         # TODO
         return random.randint(-5, 5)
-        
-
-            
-        
-
-
-    def eval(self, state):
-        # TODO
-        return random.randint(-5, 5)
