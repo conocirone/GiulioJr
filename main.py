@@ -13,7 +13,7 @@ if __name__ == "__main__":
         type=str.upper,
         choices=["WHITE", "BLACK"],
         required=True,
-    ),
+    )
     argparse.add_argument(
         "--name", help="The name of the player", type=str, default="VikingAI"
     )
