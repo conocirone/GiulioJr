@@ -85,12 +85,6 @@ class Board:
         return True                                 # checker moves from citadel/throne to a non-citadel/non-throne
 
     def move_piece(self, move):
-        # start updating __coords_color
-        color = self.__coords_color[(move[2], move[3])] = self.__coords_color[(move[0], move[1])]
-
-        # update __color_coords
-        self.__color_coords[color].remove((move[0], move[1]))
-        self.__color_coords[color].add((move[2], move[3]))
-
-        # end updating __coords_color 
-        del self.__coords_color[(move[0], move[1])]
+        piece =  self.__matrix[move[0], move[1]]
+        self.__matrix[move[0], move[1]] = "EMPTY" 
+        self.__matrix[move[2], move[3]] = piece
