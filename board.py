@@ -2,8 +2,8 @@ from collections import defaultdict
 
 class Board:
     def __init__(self):
-        self.__color_coords = defaultdict(set) # BLACK|WHITE|KING -> {(i,j), ...}
-        self.__coords_color = {}               # (i,j) -> BLACK|WHITE|KING
+        self.color_coords = defaultdict(set) # BLACK|WHITE|KING -> {(i,j), ...}
+        self.coords_color = {}               # (i,j) -> BLACK|WHITE|KING
         self.__coords_noenter = { 
             (3, 0):'L', # left citadels
             (4, 0):'L',
@@ -36,29 +36,29 @@ class Board:
 
         moves = []
         for piece in pieces:
-            coords = self.__color_coords[piece]
+            coords = self.color_coords[piece]
             for i, j in coords:
                 # Horizontal backwards
                 for j_back in range(j - 1, -1, -1):
-                    if self.__coords_color.get((i, j_back), None) == None and self.is_valid((i, j), (i, j_back)): # before calling function, check if destination coord is empty
+                    if self.coords_color.get((i, j_back), None) == None and self.is_valid((i, j), (i, j_back)): # before calling function, check if destination coord is empty
                         moves.append((i, j, i, j_back))
                     else:
                         break
                 # Horizontal forward
                 for j_forward in range(j + 1, 9):
-                    if self.__coords_color.get((i, j_forward), None) == None and self.is_valid((i, j), (i, j_forward)):
+                    if self.coords_color.get((i, j_forward), None) == None and self.is_valid((i, j), (i, j_forward)):
                         moves.append((i, j, i, j_forward))
                     else:
                         break
                 # Vertical backwards
                 for i_back in range(i - 1, -1, -1):
-                    if self.__coords_color.get((i_back, j), None) == None and self.is_valid((i, j), (i_back, j)):
+                    if self.coords_color.get((i_back, j), None) == None and self.is_valid((i, j), (i_back, j)):
                         moves.append((i, j, i_back, j))
                     else:
                         break
                 # Vertical forward
                 for i_forward in range(i + 1, 9):
-                    if self.__coords_color.get((i_forward, j), None) == None and self.is_valid((i, j), (i_forward, j)):
+                    if self.coords_color.get((i_forward, j), None) == None and self.is_valid((i, j), (i_forward, j)):
                         moves.append((i, j, i_forward, j))
                     else:
                         break
@@ -66,14 +66,14 @@ class Board:
 
     # Updates board state
     def update(self, board):
-        self.__color_coords = defaultdict(set) # BLACK|WHITE|KING -> {(i,j), ...} (str   -> set(tuple))
-        self.__coords_color = {}               # (i,j) -> BLACK|WHITE|KING        (tuple -> str       )
+        self.color_coords = defaultdict(set) # BLACK|WHITE|KING -> {(i,j), ...} (str   -> set(tuple))
+        self.coords_color = {}               # (i,j) -> BLACK|WHITE|KING        (tuple -> str       )
         for i in range(9):
             for j in range(9):
                 if board[i][j] != 'EMPTY':
-                    self.__color_coords[board[i][j]].add((i,j))
+                    self.color_coords[board[i][j]].add((i,j))
 
-        self.__coords_color = {coord:color for color,coords in self.__color_coords.items() for coord in coords}
+        self.coords_color = {coord:color for color,coords in self.color_coords.items() for coord in coords}
 
     # Checks if move is valid
     def is_valid(self, start_coords, stop_coords):
@@ -86,11 +86,11 @@ class Board:
 
     def move_piece(self, move):
         # start updating __coords_color
-        color = self.__coords_color[(move[2], move[3])] = self.__coords_color[(move[0], move[1])]
+        color = self.coords_color[(move[2], move[3])] = self.coords_color[(move[0], move[1])]
 
         # update __color_coords
-        self.__color_coords[color].remove((move[0], move[1]))
-        self.__color_coords[color].add((move[2], move[3]))
+        self.color_coords[color].remove((move[0], move[1]))
+        self.color_coords[color].add((move[2], move[3]))
 
         # end updating __coords_color 
-        del self.__coords_color[(move[0], move[1])]
+        del self.coords_color[(move[0], move[1])]
