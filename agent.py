@@ -1,7 +1,7 @@
 import random
 import time
 import copy
-
+from features import piece_score, king_safety, win_move_king, capture_king
 
 class Agent:
     def __init__(self, gateway, timeout, color, board):
@@ -88,5 +88,18 @@ class Agent:
         return new_board
 
     def eval(self, state):
-        # TODO
-        return random.randint(-5, 5)
+        # Killer moves check
+        ck = capture_king(state, self.color) 
+        if ck != 0:
+            return ck
+        
+        wmk = win_move_king(state, self.color)
+        if wmk != 0:
+            return wmk
+
+        # Feature linear combination
+        s = 0
+        s += 0.25 * piece_score(state, self.color)
+        s += 0.25 * king_safety(state, self.color)
+        # other features
+        return s
