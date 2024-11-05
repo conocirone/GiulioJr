@@ -117,66 +117,70 @@ class Board:
         # end updating __coords_color
         del self.coords_color[(move[0], move[1])]
 
+        if color == "WHITE":
+            color = "WHITEKING"
+        else:
+            color = "BLACK"
+            
         # check right
-        right_square = self.coords_color.get((stop_row, stop_col + 1), None)
-        if right_square != color and right_square is not None:
-            right_right_square = self.coords_color.get((stop_row, stop_col + 2), None)
-            if right_right_square is None:
+        right_square = self.coords_color.get((stop_row, stop_col + 1), "EMPTY")
+        if right_square not in color and right_square not in "EMPTY":
+            right_right_square = self.coords_color.get((stop_row, stop_col + 2), "EMPTY")
+            if right_right_square in "EMPTY":
                 # right_right_square is not checker, reassigned right_right to possible citadel
                 right_right_square = self.__coords_noenter.get(
-                    (stop_row, stop_col + 2), None
+                    (stop_row, stop_col + 2), "EMPTY"
                 )
-
-            if right_right_square == color or (
-                right_right_square is not None and len(right_right_square) == 1
+            if right_right_square in color or (
+                right_right_square not in "EMPTY" and len(right_right_square) == 1
             ):
                 del self.coords_color[(stop_row, stop_col + 1)]
                 self.color_coords[right_square].remove((stop_row, stop_col + 1))
 
         # check left
-        left_square = self.coords_color.get((stop_row, stop_col - 1), None)
-        if left_square != color and left_square is not None:
-            left_left_square = self.coords_color.get((stop_row, stop_col - 2), None)
-            if left_left_square is None:
+        left_square = self.coords_color.get((stop_row, stop_col - 1), "EMPTY")
+        if left_square not in color and left_square not in "EMPTY":
+            left_left_square = self.coords_color.get((stop_row, stop_col - 2), "EMPTY")
+            if left_left_square in "EMPTY":
                 # left_left_square is not checker, reassigned left_left to possible citadel
                 left_left_square = self.__coords_noenter.get(
-                    (stop_row, stop_col - 2), None
+                    (stop_row, stop_col - 2), "EMPTY"
                 )
 
-            if left_left_square == color or (
-                left_left_square is not None and len(left_left_square) == 1
+            if left_left_square in color or (
+                left_left_square not in "EMPTY" and len(left_left_square) == 1
             ):
                 del self.coords_color[(stop_row, stop_col - 1)]
                 self.color_coords[left_square].remove((stop_row, stop_col - 1))
 
         # check top
-        top_square = self.coords_color.get((stop_row - 1, stop_col), None)
-        if top_square != color and top_square is not None:
-            top_top_square = self.coords_color.get((stop_row - 2, stop_col), None)
-            if top_top_square is None:
+        top_square = self.coords_color.get((stop_row - 1, stop_col), "EMPTY")
+        if top_square not in color and top_square not in "EMPTY":
+            top_top_square = self.coords_color.get((stop_row - 2, stop_col), "EMPTY")
+            if top_top_square in "EMPTY":
                 # top_top_square is not a checker, reassigned top_top to possible citadel
                 top_top_square = self.__coords_noenter.get(
-                    (stop_row - 2, stop_col), None
+                    (stop_row - 2, stop_col), "EMPTY"
                 )
 
-            if top_top_square == color or (
-                top_top_square is not None and len(top_top_square) == 1
+            if top_top_square in color or (
+                top_top_square not in "EMPTY" and len(top_top_square) == 1
             ):
                 del self.coords_color[(stop_row - 1, stop_col)]
                 self.color_coords[top_square].remove((stop_row - 1, stop_col))
 
         # check do
-        down_square = self.coords_color.get((stop_row + 1, stop_col), None)
-        if down_square != color and down_square is not None:
-            down_down_square = self.coords_color.get((stop_row + 2, stop_col), None)
-            if down_down_square is None:
+        down_square = self.coords_color.get((stop_row + 1, stop_col), "EMPTY")
+        if down_square not in color and down_square not in "EMPTY":
+            down_down_square = self.coords_color.get((stop_row + 2, stop_col), "EMPTY")
+            if down_down_square in "EMPTY":
                 # down_down_square is not checker, reassigned down_down to possible citadel
                 down_down_square = self.__coords_noenter.get(
-                    (stop_row + 2, stop_col), None
+                    (stop_row + 2, stop_col), "EMPTY"
                 )
 
-            if down_down_square == color or (
-                down_down_square is not None and len(down_down_square) == 1
+            if down_down_square in color or (
+                down_down_square not in "EMPTY" and len(down_down_square) == 1
             ):
                 del self.coords_color[(stop_row + 1, stop_col)]
                 self.color_coords[down_square].remove((stop_row + 1, stop_col))
