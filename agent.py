@@ -99,7 +99,7 @@ class Agent:
 
         # Feature linear combination
         s = 0
-        s += 0.25 * piece_score(state, self.color)
-        s += 0.25 * king_safety(state, self.color)
+        s += 0.3 * piece_score(state, self.color)
+        s += 0.2 * king_safety(state, self.color)
         # other features
         return s

@@ -12,7 +12,7 @@ def piece_score(state, color):
     black_count = len(state.color_coords["BLACK"])
 
     # NOTE: Assumption white piece score is 2 and black piece 1.
-    score = 2 * white_count - black_count
+    score = 2 * white_count - black_count 
 
     normalized_score = score / 16
 
@@ -86,6 +86,7 @@ def win_move_king(state, color):
     found = False
     if king_position[1] in (0, 8) or king_position[0] in (0, 8):
         if color == "WHITE":
+            print('Win White')
             return float("inf")
         else:
             return float("-inf")
