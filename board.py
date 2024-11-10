@@ -5,7 +5,7 @@ class Board:
     def __init__(self):
         self.color_coords = defaultdict(set)  # BLACK|WHITE|KING -> {(i,j), ...}
         self.coords_color = {}  # (i,j) -> BLACK|WHITE|KING
-        self.__coords_noenter = { # TODO: make static
+        self.coords_noenter = { # TODO: make static
             (3, 0): "L",  # left citadels
             (4, 0): "LC",
             (5, 0): "L",
@@ -27,7 +27,7 @@ class Board:
 
     def get_available_moves(self, color):
         if color == "WHITE":
-            pieces = ("WHITE", "KING")
+            pieces = ("KING", "WHITE")
         else:
             pieces = ("BLACK",)
 
@@ -90,9 +90,9 @@ class Board:
 
     # Checks if move is valid
     def is_valid(self, start_coords, stop_coords):
-        start_noenter, stop_noenter = self.__coords_noenter.get(
+        start_noenter, stop_noenter = self.coords_noenter.get(
             start_coords, None
-        ), self.__coords_noenter.get(stop_coords, None)
+        ), self.coords_noenter.get(stop_coords, None)
         if start_noenter == None:  # checker outside of citadel/throne
             return stop_noenter == None  # moves to a non-citadel/non-throne -> True
         elif (
@@ -105,7 +105,7 @@ class Board:
 
     def move_piece(self, move):
         stop_row, stop_col = move[2], move[3]
-        # start updating __coords_color
+        # start updating coords_color
         color = self.coords_color[(stop_row, stop_col)] = self.coords_color[
             (move[0], move[1])
         ]
@@ -114,7 +114,7 @@ class Board:
         self.color_coords[color].remove((move[0], move[1]))
         self.color_coords[color].add((stop_row, stop_col))
 
-        # end updating __coords_color
+        # end updating coords_color
         del self.coords_color[(move[0], move[1])]
 
         if color == "WHITE" or color == "KING":
@@ -166,11 +166,11 @@ class Board:
                 del self.coords_color[next_coords]
                 self.color_coords[next_square].remove(next_coords)
 
-        if next_square not in color and next_square not in "EMPTY":
+        elif next_square not in color and next_square not in "EMPTY":
             next_next_square = self.coords_color.get(next_next_coords, "EMPTY")
             if next_next_square in "EMPTY":
                 # next_next_square is not checker, reassigned next_next to possible citadel
-                next_next_square = self.__coords_noenter.get(next_next_coords, "EMPTY")
+                next_next_square = self.coords_noenter.get(next_next_coords, "EMPTY")
             if next_next_square in color or (
                 next_next_square not in "EMPTY" and len(next_next_square) == 1
             ):
@@ -185,3 +185,11 @@ class Board:
             return temp.pop()
         except KeyError:
             return None
+
+    def __repr__(self):
+        res = ''
+        for i in range(9):
+            for j in range(9): 
+                res += self.coords_color.get((i,j), '*****') + "  "
+            res += '\n'
+        return res

@@ -86,7 +86,6 @@ def win_move_king(state, color):
     found = False
     if king_position[1] in (0, 8) or king_position[0] in (0, 8):
         if color == "WHITE":
-            print('Win White')
             return float("inf")
         else:
             return float("-inf")
