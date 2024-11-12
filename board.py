@@ -27,7 +27,7 @@ class Board:
 
     def get_available_moves(self, color):
         if color == "WHITE":
-            pieces = ("WHITE", "KING")
+            pieces = ("KING", "WHITE")
         else:
             pieces = ("BLACK",)
 
@@ -165,8 +165,9 @@ class Board:
             if required_for_capture - close_blacks == 0:
                 del self.coords_color[next_coords]
                 self.color_coords[next_square].remove(next_coords)
+                
 
-        if next_square not in color and next_square not in "EMPTY":
+        elif next_square not in color and next_square not in "EMPTY":
             next_next_square = self.coords_color.get(next_next_coords, "EMPTY")
             if next_next_square in "EMPTY":
                 # next_next_square is not checker, reassigned next_next to possible citadel
