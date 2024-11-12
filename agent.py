@@ -1,7 +1,7 @@
 import random
 import time
 import copy
-from features import piece_score, king_safety, win_move_king, capture_king
+from features import piece_score, king_safety, win_move_king, capture_king, king_distance
 
 class Agent:
     def __init__(self, gateway, timeout, color, board):
@@ -101,5 +101,6 @@ class Agent:
         s = 0
         s += 0.3 * piece_score(state, self.color)
         s += 0.2 * king_safety(state, self.color)
+        s += 0.5 * king_distance(state, self.color)
         # other features
         return s
