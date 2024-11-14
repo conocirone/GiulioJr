@@ -28,5 +28,4 @@ if __name__ == "__main__":
 
     board = Board()
     gateway = Gateway(args.team, args.name, args.ip)
-    Agent(gateway, args.timeout, args.team, board)
-    # NewAgent(gateway, args.timeout, args.team, board)
+    NewAgent(gateway, args.timeout, args.team, board)
