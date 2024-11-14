@@ -76,6 +76,7 @@ def king_safety(state, color):
 def capture_king(state, color):
     if state.get_king_coords() is None:
         if color == "WHITE":
+            print('king is dead')
             return float("-inf")
         else:
             return float("inf")
@@ -208,4 +209,3 @@ def king_distance(state, color):
             return -normalized_score
         
 
-    

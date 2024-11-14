@@ -4,7 +4,6 @@ import copy
 from features import piece_score, king_safety, win_move_king, capture_king, king_distance
 from state import State, Player
 
-
 class Agent:
     def __init__(self, gateway, timeout, color, board):
         self.gateway = gateway
