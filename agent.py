@@ -1,5 +1,7 @@
 import random
 import time
+import copy
+from features import piece_score, king_safety, win_move_king, capture_king, king_distance
 
 class Agent:
     def __init__(self, gateway, timeout, color, board):
@@ -14,11 +16,18 @@ class Agent:
             current_state, turn = gateway.get_state()
             if turn == self.color:
                 self.board.update(current_state)
-                moves = self.board.get_available_moves(self.color)
-                # Random agent
-                random_move = random.choice(moves)
 
-                conv_move = self.convert_move(random_move)
+                # Define depth, timeout percentage
+                _, move = self.alphabeta(
+                    self.board,
+                    depth=10,
+                    alpha=float("-inf"),
+                    beta=float("inf"),
+                    max_player=True,
+                    time_limit=time.time() + self.timeout * 0.95,
+                )
+
+                conv_move = self.convert_move(move)
                 self.gateway.send_state(conv_move)
 
     def convert_move(self, move):
@@ -33,47 +42,65 @@ class Agent:
         return chr(move[1] + 97) + str(move[0] + 1), chr(move[3] + 97) + str(
             move[2] + 1
         )
-    
-    
-    def alphabeta(state, depth, alpha, beta, maximazingPlayer, time_limit):
-        if depth == 0 and time.time() >= time_limit:
-            value = eval(state)
-            #put this value into a transposition table
-            return value
-        
-        oppositeColor = ''
+
+    def alphabeta(self, state, depth, alpha, beta, max_player, time_limit):
+        # Cutoff
+        if depth == 0 or time.time() >= time_limit:
+            value = self.eval(state)
+            return value, None
+
         if self.color == "WHITE":
             oppositeColor = "BLACK"
-        else: 
-            oppositeColor = "WHITE"
-        
-                
-        if(maximazingPlayer):
-            bestValue = float('-inf')
-            for move in state.get_available_moves(oppositeColor):
-                s = do_move(state, move)
-                value = alphabeta(s, depth - 1, alpha, beta, False)
-                bestValue = max(bestValue, value)
-                alpha = max(alpha, bestValue)
-                if bestValue >= beta:
-                    return bestValue, move
-            return bestValue, move
         else:
-            bestValue = float('inf')
-            for move in state.get_available_moves(oppositeColor):
-                s = do_move(state, move)
-                value = alphabeta(s, depth - 1, alpha, beta, True)
-                bestValue = min(bestValue, value)
-                beta = min(beta, bestValue)
+            oppositeColor = "WHITE"
+
+        best_move = None
+        if max_player:
+            bestValue = float("-inf")
+            available_moves = state.get_available_moves(self.color)
+            for move in available_moves:  # TODO: Order moves
+                s = self.do_move(state, move)
+                value, _ = self.alphabeta(s, depth - 1, alpha, beta, False, time_limit)
+                if value > bestValue:
+                    bestValue = value
+                    best_move = move
+                    alpha = max(alpha, bestValue)
+                if bestValue >= beta:
+                    break
+            return bestValue, best_move
+        else:
+            bestValue = float("inf")
+            available_moves = state.get_available_moves(oppositeColor)
+            for move in available_moves:
+                s = self.do_move(state, move)
+                value, _ = self.alphabeta(s, depth - 1, alpha, beta, True, time_limit)
+                if value < bestValue:
+                    bestValue = value
+                    best_move = move
+                    beta = min(beta, bestValue)
                 if bestValue <= alpha:
-                    return bestValue, move
-            return bestValue, move        
-        
+                    break
+            return bestValue, best_move
+
     def do_move(self, state, move):
-        new_board = state.copy()
+        new_board = copy.deepcopy(state)
         new_board.move_piece(move)
         return new_board
-        
 
-            
+    def eval(self, state):
+        # Killer moves check
+        ck = capture_king(state, self.color) 
+        if ck != 0:
+            return ck
         
+        wmk = win_move_king(state, self.color)
+        if wmk != 0:
+            return wmk
+
+        # Feature linear combination
+        s = 0
+        s += 0.3 * piece_score(state, self.color)
+        s += 0.1* king_safety(state, self.color)
+        s += 0.6 * king_distance(state, self.color)
+        # other features
+        return s
