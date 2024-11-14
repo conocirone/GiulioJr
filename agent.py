@@ -1,7 +1,8 @@
-import random
 import time
 import copy
+
 from features import piece_score, king_safety, win_move_king, capture_king, king_distance
+from state import State, Player
 
 class Agent:
     def __init__(self, gateway, timeout, color, board):
@@ -18,14 +19,15 @@ class Agent:
                 self.board.update(current_state)
 
                 # Define depth, timeout percentage
-                _, move = self.alphabeta(
-                    self.board,
-                    depth=10,
-                    alpha=float("-inf"),
-                    beta=float("inf"),
-                    max_player=True,
-                    time_limit=time.time() + self.timeout * 0.95,
-                )
+                start_time = time.time()
+                move, n_nodes = self.alphabeta_it(
+                    time_limit = time.time() + self.timeout * 0.95, 
+                    depth = 10)
+                elapsed_time = time.time() - start_time
+
+                # print(f"Explored nodes: {n_nodes}")
+                # print(f"Time elapsed: {elapsed_time}")
+                # print(f"Avg n_nodes/sec: {int(n_nodes/elapsed_time)}")
 
                 conv_move = self.convert_move(move)
                 self.gateway.send_state(conv_move)
@@ -43,44 +45,55 @@ class Agent:
             move[2] + 1
         )
 
-    def alphabeta(self, state, depth, alpha, beta, max_player, time_limit):
-        # Cutoff
-        if depth == 0 or time.time() >= time_limit:
-            value = self.eval(state)
-            return value, None
+    def alphabeta_it(self, time_limit, depth):
+        root_state = State(self.board, None, float('-inf'), self.color, Player.MAX, float('-inf'), float('inf'))
+        L = [root_state]
 
-        if self.color == "WHITE":
-            oppositeColor = "BLACK"
-        else:
-            oppositeColor = "WHITE"
+        n_nodes = 0
+        state = root_state
 
-        best_move = None
-        if max_player:
-            bestValue = float("-inf")
-            available_moves = state.get_available_moves(self.color)
-            for move in available_moves:  # TODO: Order moves
-                s = self.do_move(state, move)
-                value, _ = self.alphabeta(s, depth - 1, alpha, beta, False, time_limit)
-                if value > bestValue:
-                    bestValue = value
-                    best_move = move
-                    alpha = max(alpha, bestValue)
-                if bestValue >= beta:
-                    break
-            return bestValue, best_move
-        else:
-            bestValue = float("inf")
-            available_moves = state.get_available_moves(oppositeColor)
-            for move in available_moves:
-                s = self.do_move(state, move)
-                value, _ = self.alphabeta(s, depth - 1, alpha, beta, True, time_limit)
-                if value < bestValue:
-                    bestValue = value
-                    best_move = move
-                    beta = min(beta, bestValue)
-                if bestValue <= alpha:
-                    break
-            return bestValue, best_move
+        while not root_state.evaluated:
+
+            if state.evaluated:
+                del L[-1]
+                parent = L[-1]
+                n_nodes += 1
+
+                if parent.player == Player.MAX:
+                    if state.value > parent.value:
+                        parent.value = state.value
+                        parent.best_move = state.move
+                    if parent.value >= parent.beta:
+                        parent.evaluated = True
+                        continue
+                    parent.alpha = max(parent.alpha, parent.value)
+                else: 
+                    if state.value < parent.value:
+                        parent.value = state.value
+                        parent.best_move = state.move
+                    if parent.value <= parent.alpha:
+                        parent.evaluated = True
+                        continue
+                    parent.beta = min(parent.beta, parent.value)
+
+                next_state = parent.next_state()
+                if next_state != parent:
+                    L.append(next_state)
+                else:
+                    parent.evaluated = True
+
+            elif len(L) == depth+1 or time.time() >= time_limit:
+                state.value = self.eval(state.board)
+                state.evaluated = True
+
+            else:
+                next_state = state.next_state()
+                if next_state != state:
+                    L.append(next_state)
+
+            state = L[-1]
+
+        return root_state.best_move, n_nodes
 
     def do_move(self, state, move):
         new_board = copy.deepcopy(state)

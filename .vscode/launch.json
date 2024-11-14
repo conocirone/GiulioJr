@@ -5,13 +5,23 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Python Debugger: Current File with Arguments",
+            "name": "Python Debugger: White",
             "type": "debugpy",
             "request": "launch",
             "program": "main.py",
             "console": "integratedTerminal",
             "args": [
-                "--team WHITE --name VikingAI --ip localhost --timeout "
+                "--team", "WHITE", "--name", "VikingAI", "--ip", "localhost", "--timeout", "30"
+            ]
+        },
+        {
+            "name": "Python Debugger: Black",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "main.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--team", "BLACK", "--name", "VikingAI", "--ip", "localhost", "--timeout", "30"
             ]
         }
     ]
