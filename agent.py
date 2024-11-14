@@ -19,15 +19,15 @@ class Agent:
                 self.board.update(current_state)
 
                 # Define depth, timeout percentage
-                start_time = time.time()
-                move, n_nodes = self.alphabeta_it(
+                
+                """"
+                  move = self.alphabeta_it(
                     time_limit = time.time() + self.timeout * 0.95, 
                     depth = 10)
-                elapsed_time = time.time() - start_time
-
-                # print(f"Explored nodes: {n_nodes}")
-                # print(f"Time elapsed: {elapsed_time}")
-                # print(f"Avg n_nodes/sec: {int(n_nodes/elapsed_time)}")
+                """""
+              
+                
+                move = self.iterative_deepening(time.time() + self.timeout * 0.95)
 
                 conv_move = self.convert_move(move)
                 self.gateway.send_state(conv_move)
@@ -44,12 +44,30 @@ class Agent:
         return chr(move[1] + 97) + str(move[0] + 1), chr(move[3] + 97) + str(
             move[2] + 1
         )
+        
+    
+    def iterative_deepening(self, time_limit):
+        depth = 1
+        best_move = None
+        while time.time() < time_limit:
+            
+            move  = self.alphabeta_it(
+                time_limit = time_limit, 
+                depth = depth)
+            
+            if move is not None:
+                best_move = move
+                print("Best move: ", best_move, "depth: ", depth)
+                depth += 1
+
+        if best_move is None:
+            best_move = self.board.get_available_moves(self.color)[0] 
+        return best_move
 
     def alphabeta_it(self, time_limit, depth):
         root_state = State(self.board, None, float('-inf'), self.color, Player.MAX, float('-inf'), float('inf'))
         L = [root_state]
 
-        n_nodes = 0
         state = root_state
 
         while not root_state.evaluated:
@@ -57,7 +75,6 @@ class Agent:
             if state.evaluated:
                 del L[-1]
                 parent = L[-1]
-                n_nodes += 1
 
                 if parent.player == Player.MAX:
                     if state.value > parent.value:
@@ -82,9 +99,12 @@ class Agent:
                 else:
                     parent.evaluated = True
 
-            elif len(L) == depth+1 or time.time() >= time_limit:
+            elif len(L) == depth+1:
                 state.value = self.eval(state.board)
                 state.evaluated = True
+
+            elif time.time() >= time_limit:
+                break
 
             else:
                 next_state = state.next_state()
@@ -93,7 +113,7 @@ class Agent:
 
             state = L[-1]
 
-        return root_state.best_move, n_nodes
+        return root_state.best_move
 
     def do_move(self, state, move):
         new_board = copy.deepcopy(state)
