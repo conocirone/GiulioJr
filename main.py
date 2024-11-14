@@ -1,6 +1,5 @@
 from gateway import Gateway
 from agent import Agent
-from new_agent import NewAgent
 import argparse
 from board import Board
 
@@ -28,4 +27,4 @@ if __name__ == "__main__":
 
     board = Board()
     gateway = Gateway(args.team, args.name, args.ip)
-    NewAgent(gateway, args.timeout, args.team, board)
+    Agent(gateway, args.timeout, args.team, board)
