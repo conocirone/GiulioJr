@@ -8,18 +8,50 @@ def piece_score(state, color):
     Returns:
         int: score between -1 and 1
     """
-    white_count = len(state.color_coords["WHITE"])
-    black_count = len(state.color_coords["BLACK"])
+    # white_count = len(state.color_coords["WHITE"])
+    # black_count = len(state.color_coords["BLACK"])
+    #
+    # # NOTE: Assumption white piece score is 2 and black piece 1.
+    # score = 2 * white_count - black_count 
+    #
+    # normalized_score = score / 16
+    #
+    # if color == "WHITE":
+    #     return normalized_score
+    # return -normalized_score
+    
 
-    # NOTE: Assumption white piece score is 2 and black piece 1.
-    score = 2 * white_count - black_count 
+    w_score = 0
+    for w in state.color_coords['WHITE']:
+        # w_score += (abs(w[0] - 4)+abs(w[1] - 4))/8 * 2 - 1
+        cnt = 0
+        if (state.coords_color.get((w[0],     w[1] + 1), None) is None or
+           state.coords_color.get((w[0],     w[1] + 1), None) == "BLACK"):
+            cnt += 1
+        if (state.coords_color.get((w[0] + 1, w[1]), None) is None or
+            state.coords_color.get((w[0] + 1, w[1]), None) == "BLACK"):
+            cnt += 1
+        if (state.coords_color.get((w[0],     w[1] - 1), None) is None or
+            state.coords_color.get((w[0],    w[1] - 1), None) == "BLACK"):
+            cnt += 1
+        if (state.coords_color.get((w[0] - 1, w[1]), None) is None or
+            state.coords_color.get((w[0] - 1, w[1]), None) == "BLACK"):
+            cnt += 1
 
-    normalized_score = score / 16
+        w_score += cnt/3 * 2 - 1
+    print(w_score)
+
+    b_score = 0 
+    k = state.get_king_coords()
+    for b in state.color_coords['BLACK']:
+        b_score += 1 - (abs(b[0] - k[0]) + abs(b[1] - k[1]))/7
+
+    normalized_score = (w_score - b_score)/8
 
     if color == "WHITE":
         return normalized_score
-    else:
-        return -normalized_score
+    return -normalized_score
+
 
 
 
@@ -75,6 +107,7 @@ def king_safety(state, color):
 
 def capture_king(state, color):
     if state.get_king_coords() is None:
+        print('king is dead')
         if color == "WHITE":
             return float("-inf")
         else:
@@ -204,7 +237,4 @@ def king_distance(state, color):
         normalized_score = ((final_score - 0.25) / 7.25) * 2 - 1
         if color == "BLACK":
             return normalized_score
-        else:
-            return -normalized_score
-        
-
+        return -normalized_score

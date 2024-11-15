@@ -29,6 +29,9 @@ class Agent:
                 
                 move = self.iterative_deepening(time.time() + self.timeout * 0.95)
 
+
+                print(f"Move {move}, piece score: {piece_score(self.do_move(board, move), self.color)}")
+
                 conv_move = self.convert_move(move)
                 self.gateway.send_state(conv_move)
 
@@ -57,7 +60,7 @@ class Agent:
             
             if move is not None:
                 best_move = move
-                print("Best move: ", best_move, "depth: ", depth)
+                # print("Best move: ", best_move, "depth: ", depth)
                 depth += 1
 
         if best_move is None:
@@ -133,7 +136,7 @@ class Agent:
         # Feature linear combination
         s = 0
         s += 0.3 * piece_score(state, self.color)
-        s += 0.1* king_safety(state, self.color)
+        s += 0.1 * king_safety(state, self.color)
         s += 0.6 * king_distance(state, self.color)
         # other features
         return s

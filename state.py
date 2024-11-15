@@ -15,7 +15,7 @@ class State:
         self.beta = beta
         self.move = move
         self.best_move = None
-        self.available_moves_iterator = iter(self.board.get_available_moves(self.color))
+        self.available_moves_iterator = self.board.get_available_moves(self.color)
         self.evaluated = False
 
     def next_state(self):
