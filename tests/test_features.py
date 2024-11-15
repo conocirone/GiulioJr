@@ -117,6 +117,32 @@ class TestFeatures(unittest.TestCase):
         self.assertEqual(king_safety(b, "WHITE"), -1)
         self.assertEqual(king_safety(b, "BLACK"), 1)
 
+    def test_capture_king(self):
+        b = Board()
+        self.assertEqual(capture_king(b, "WHITE"), float("-inf"))
+        self.assertEqual(capture_king(b, "BLACK"), float("inf"))
+
+    def test_win_move_king(self):
+        b = Board()
+        b.color_coords["KING"] = {(4, 2)}
+        # King in empty col
+        self.assertEqual(win_move_king(b, "WHITE"), float("inf"))
+        self.assertEqual(win_move_king(b, "BLACK"), float("-inf"))
+
+        b.color_coords["KING"] = {(2, 4)}
+        # King in empty row
+        self.assertEqual(win_move_king(b, "WHITE"), float("inf"))
+        self.assertEqual(win_move_king(b, "BLACK"), float("-inf"))
+
+        # King on boarder
+        b.color_coords["KING"] = {(3, 0)}
+        self.assertEqual(win_move_king(b, "WHITE"), float("inf"))
+        self.assertEqual(win_move_king(b, "BLACK"), float("-inf"))
+
+        b.color_coords["KING"] = {(0, 5)}
+        self.assertEqual(win_move_king(b, "WHITE"), float("inf"))
+        self.assertEqual(win_move_king(b, "BLACK"), float("-inf"))
+
 
 if __name__ == "main":
     unittest.main()
