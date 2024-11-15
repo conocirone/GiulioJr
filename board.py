@@ -168,10 +168,10 @@ class Board:
                 
 
         elif next_square not in color and next_square not in "EMPTY":
-            next_next_square = self.coords_color.get(next_next_coords, "EMPTY")
+            next_next_square = self.__coords_noenter.get(next_next_coords, "EMPTY")
             if next_next_square in "EMPTY":
                 # next_next_square is not checker, reassigned next_next to possible citadel
-                next_next_square = self.__coords_noenter.get(next_next_coords, "EMPTY")
+                next_next_square = self.coords_color.get(next_next_coords, "EMPTY")
             if next_next_square in color or (
                 next_next_square not in "EMPTY" and len(next_next_square) == 1
             ):
