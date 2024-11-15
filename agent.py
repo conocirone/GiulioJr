@@ -52,7 +52,6 @@ class Agent:
             if move is not None:
                 best_move = move
                 print("Best move: ", best_move, "depth: ", depth)
-                print(f"{Board.history_table[self.color]}")
                 depth += 1
 
         if best_move is None:
@@ -76,7 +75,7 @@ class Agent:
                         parent.value = state.value
                         parent.best_move = state.move
                     if parent.value >= parent.beta:
-                        Board.history_table[self.color][state.move] = depth**2
+                        Board.history_table[parent.color][state.move] = depth**2
                         parent.evaluated = True
                         continue
                     parent.alpha = max(parent.alpha, parent.value)
@@ -85,7 +84,7 @@ class Agent:
                         parent.value = state.value
                         parent.best_move = state.move
                     if parent.value <= parent.alpha:
-                        Board.history_table[self.color][state.move] = depth**2
+                        Board.history_table[parent.color][state.move] = depth**2
                         parent.evaluated = True
                         continue
                     parent.beta = min(parent.beta, parent.value)
