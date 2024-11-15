@@ -6,6 +6,7 @@ class Player(Enum):
     MIN = 0
 
 class State:
+    
     def __init__(self, board, move, value, color, player, alpha, beta):
         self.board = board
         self.value = value

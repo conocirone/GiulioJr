@@ -2,34 +2,42 @@ from collections import defaultdict
 
 
 class Board:
+    __coords_noenter = { # TODO: make static
+        (3, 0): "L",  # left citadels
+        (4, 0): "LC",
+        (5, 0): "L",
+        (4, 1): "L",
+        (3, 8): "R",  # right citadels
+        (4, 8): "RC",
+        (5, 8): "R",
+        (4, 7): "R",
+        (0, 3): "U",  # upper citadels
+        (0, 4): "UC",
+        (0, 5): "U",
+        (1, 4): "U",
+        (8, 3): "D",  # lower citadels
+        (8, 4): "DC",
+        (8, 5): "D",
+        (7, 4): "D",
+        (4, 4): "T",  # throne
+    }
+
+    history_table = {'WHITE':{}, 'BLACK':{}} # {COLOR: {move: value}}
+
     def __init__(self):
         self.color_coords = defaultdict(set)  # BLACK|WHITE|KING -> {(i,j), ...}
         self.coords_color = {}  # (i,j) -> BLACK|WHITE|KING
-        self.__coords_noenter = { # TODO: make static
-            (3, 0): "L",  # left citadels
-            (4, 0): "LC",
-            (5, 0): "L",
-            (4, 1): "L",
-            (3, 8): "R",  # right citadels
-            (4, 8): "RC",
-            (5, 8): "R",
-            (4, 7): "R",
-            (0, 3): "U",  # upper citadels
-            (0, 4): "UC",
-            (0, 5): "U",
-            (1, 4): "U",
-            (8, 3): "D",  # lower citadels
-            (8, 4): "DC",
-            (8, 5): "D",
-            (7, 4): "D",
-            (4, 4): "T",  # throne
-        }
 
     def get_available_moves(self, color):
         if color == "WHITE":
             pieces = ("KING", "WHITE")
         else:
             pieces = ("BLACK",)
+        
+        # for move, value in  self.history_table[color].items():
+        #     from_move = (move[0], move[1])
+
+        #     if color == 'WHITE' and (from_move in self.color_coords['KING'] or :
 
         moves = []
         for piece in pieces:
@@ -69,7 +77,22 @@ class Board:
                         moves.append((i, j, i_forward, j))
                     else:
                         break
-        return moves
+        
+        heuristic_moves = []
+        
+        i = 0
+        while i < len(moves):
+            move = moves[i]
+            if move in self.history_table[color]:
+                heuristic_moves.append((move, self.history_table[color][move]))
+                del moves[i]
+            else:
+                i += 1
+
+        heuristic_moves.sort(key=lambda x: x[1], reverse=True)
+        sorted_moves = [move[0] for move in heuristic_moves] + moves
+            
+        return sorted_moves
 
     # Updates board state
     def update(self, board):
