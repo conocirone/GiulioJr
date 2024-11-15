@@ -2,7 +2,7 @@ from collections import defaultdict
 
 
 class Board:
-    __coords_noenter = { # TODO: make static
+    coords_noenter = { # TODO: make static
         (3, 0): "L",  # left citadels
         (4, 0): "LC",
         (5, 0): "L",
@@ -157,8 +157,7 @@ class Board:
         next_next_coords = (stop_row + (inc_row * 2), stop_col + (inc_col*2))
         next_square = self.coords_color.get(next_coords, "EMPTY")
 
-        if color == 'BLACK' and next_square == 'KING' and 4 in next_coords:
-            required_for_capture = 2
+        if color == 'BLACK' and next_square == 'KING' and next_coords in ((4,4), (5,4), (4,5), (4,3), (3,4)):
             if next_coords == (4,4): # king on throne
                 required_for_capture = 4
             else:
@@ -191,10 +190,10 @@ class Board:
                 
 
         elif next_square not in color and next_square not in "EMPTY":
-            next_next_square = self.coords_color.get(next_next_coords, "EMPTY")
+            next_next_square = self.coords_noenter.get(next_next_coords, "EMPTY")
             if next_next_square in "EMPTY":
                 # next_next_square is not checker, reassigned next_next to possible citadel
-                next_next_square = self.__coords_noenter.get(next_next_coords, "EMPTY")
+                next_next_square = self.coords_color.get(next_next_coords, "EMPTY")
             if next_next_square in color or (
                 next_next_square not in "EMPTY" and len(next_next_square) == 1
             ):
