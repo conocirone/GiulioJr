@@ -52,6 +52,7 @@ class Agent:
             if move is not None:
                 best_move = move
                 print("Best move: ", best_move, "depth: ", depth)
+                print(f"{Board.history_table[self.color]}")
                 depth += 1
 
         if best_move is None:
