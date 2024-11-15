@@ -50,7 +50,8 @@ class Board:
                     ) is None and self.is_valid(
                         (i, j), (i, j_back)
                     ):  # before calling function, check if destination coord is empty
-                        moves.append((i, j, i, j_back))
+                        # moves.append((i, j, i, j_back))
+                        yield (i, j, i, j_back)
                     else:
                         break
                 # Horizontal forward
@@ -58,7 +59,8 @@ class Board:
                     if self.coords_color.get(
                         (i, j_forward), None
                     ) is None and self.is_valid((i, j), (i, j_forward)):
-                        moves.append((i, j, i, j_forward))
+                        # moves.append((i, j, i, j_forward))
+                        yield (i, j, i, j_forward)
                     else:
                         break
                 # Vertical backwards
@@ -66,7 +68,8 @@ class Board:
                     if self.coords_color.get(
                         (i_back, j), None
                     ) is None and self.is_valid((i, j), (i_back, j)):
-                        moves.append((i, j, i_back, j))
+                        # moves.append((i, j, i_back, j))
+                        yield (i, j, i_back, j)
                     else:
                         break
                 # Vertical forward
@@ -74,7 +77,8 @@ class Board:
                     if self.coords_color.get(
                         (i_forward, j), None
                     ) is None and self.is_valid((i, j), (i_forward, j)):
-                        moves.append((i, j, i_forward, j))
+                        # moves.append((i, j, i_forward, j))
+                        yield (i, j, i_forward, j)
                     else:
                         break
         
@@ -93,6 +97,7 @@ class Board:
         sorted_moves = [move[0] for move in heuristic_moves] + moves
             
         return sorted_moves
+
 
     # Updates board state
     def update(self, board):

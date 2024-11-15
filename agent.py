@@ -40,6 +40,7 @@ class Agent:
             move[2] + 1
         )
         
+
     def iterative_deepening(self, time_limit):
         depth = 1
         best_move = None
@@ -51,7 +52,6 @@ class Agent:
             
             if move is not None:
                 best_move = move
-                print("Best move: ", best_move, "depth: ", depth)
                 depth += 1
 
         if best_move is None:
@@ -95,9 +95,12 @@ class Agent:
                 else:
                     parent.evaluated = True
 
-            elif len(L) == depth+1 or time.time() >= time_limit:
+            elif len(L) == depth+1:
                 state.value = self.eval(state.board)
                 state.evaluated = True
+
+            elif time.time() >= time_limit:
+                break
 
             else:
                 next_state = state.next_state()
@@ -126,7 +129,7 @@ class Agent:
         # Feature linear combination
         s = 0
         s += 0.3 * piece_score(state, self.color)
-        s += 0.1* king_safety(state, self.color)
+        s += 0.1 * king_safety(state, self.color)
         s += 0.6 * king_distance(state, self.color)
         # other features
         return s
