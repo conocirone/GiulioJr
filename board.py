@@ -113,9 +113,9 @@ class Board:
 
     # Checks if move is valid
     def is_valid(self, start_coords, stop_coords):
-        start_noenter, stop_noenter = self.__coords_noenter.get(
+        start_noenter, stop_noenter = self.coords_noenter.get(
             start_coords, None
-        ), self.__coords_noenter.get(stop_coords, None)
+        ), self.coords_noenter.get(stop_coords, None)
         if start_noenter == None:  # checker outside of citadel/throne
             return stop_noenter == None  # moves to a non-citadel/non-throne -> True
         elif (
