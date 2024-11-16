@@ -1,3 +1,6 @@
+from board import Board
+
+
 def piece_score(state, color):
     """
     Returns piece score advantage, KING not included in scoring
@@ -36,34 +39,38 @@ def king_safety(state, color):
     """
     king_position = state.get_king_coords()
 
-    if king_position[0] == 4 and king_position[1] == 4:  # king oh throne
+    if king_position == (4,4):  # king oh throne
         required_for_capture = 4
 
-    elif king_position[0] == 4 or king_position[1] == 4:  # king next to throne
+    elif king_position in ((4,5), (5,4), (4,3), (3,4)):  # king next to throne
         required_for_capture = 3
-
+    
     else:
         required_for_capture = 2
 
     close_blacks = 0
     if (
         state.coords_color.get((king_position[0] - 1, king_position[1]), None)
-        == "BLACK"
+        == "BLACK" or
+        Board.coords_noenter.get((king_position[0] - 1, king_position[1]), 'EMPTY') in 'LRUD'
     ):  # Up square check
         close_blacks += 1
     if (
         state.coords_color.get((king_position[0] + 1, king_position[1]), None)
-        == "BLACK"
+        == "BLACK" or
+        Board.coords_noenter.get((king_position[0] + 1, king_position[1]), 'EMPTY') in 'LRUD'
     ):  # Down square check
         close_blacks += 1
     if (
         state.coords_color.get((king_position[0], king_position[1] - 1), None)
-        == "BLACK"
+        == "BLACK" or
+        Board.coords_noenter.get((king_position[0], king_position[1] - 1), 'EMPTY') in 'LRUD'
     ):  # Left square check
         close_blacks += 1
     if (
         state.coords_color.get((king_position[0], king_position[1] + 1), None)
-        == "BLACK"
+        == "BLACK" or
+        Board.coords_noenter.get((king_position[0], king_position[1] + 1), 'EMPTY') in 'LRUD'
     ):  # Right square check
         close_blacks += 1
 
