@@ -194,41 +194,33 @@ def king_distance(state, color):
         elif b in hq_br:
             dict_q_br["row" + str(b[0])] = 1
 
-        count_q_tr = sum(dict_q_tr.values())
-        count_q_tl = sum(dict_q_tl.values())
-        count_q_bl = sum(dict_q_bl.values())
-        count_q_br = sum(dict_q_br.values())
+    count_q_tr = sum(dict_q_tr.values())
+    count_q_tl = sum(dict_q_tl.values())
+    count_q_bl = sum(dict_q_bl.values())
+    count_q_br = sum(dict_q_br.values())
 
-        # manhattan distance from king to angles
-        dist_tr = abs(king_position[0] - tr_angle[0]) + abs(
-            king_position[1] - tr_angle[1]
-        )
-        dist_tl = abs(king_position[0] - tl_angle[0]) + abs(
-            king_position[1] - tl_angle[1]
-        )
-        dist_br = abs(king_position[0] - br_angle[0]) + abs(
-            king_position[1] - br_angle[1]
-        )
-        dist_bl = abs(king_position[0] - bl_angle[0]) + abs(
-            king_position[1] - bl_angle[1]
-        )
+    # manhattan distance from king to angles
+    dist_tr = abs(king_position[0] - tr_angle[0]) + abs(king_position[1] - tr_angle[1])
+    dist_tl = abs(king_position[0] - tl_angle[0]) + abs(king_position[1] - tl_angle[1])
+    dist_br = abs(king_position[0] - br_angle[0]) + abs(king_position[1] - br_angle[1])
+    dist_bl = abs(king_position[0] - bl_angle[0]) + abs(king_position[1] - bl_angle[1])
 
-        # distance/4 -> to test
-        final_score = min(
-            (
-                dist_tr / 4 + count_q_tr,
-                dist_tl / 4 + count_q_tl,
-                dist_br / 4 + count_q_br,
-                dist_bl / 4 + count_q_bl,
-            )
+    # distance/4 -> to test
+    final_score = min(
+        (
+            dist_tr / 4 + count_q_tr,
+            dist_tl / 4 + count_q_tl,
+            dist_br / 4 + count_q_br,
+            dist_bl / 4 + count_q_bl,
         )
+    )
 
-        # normalize the final_score between -1 and 1
-        # max valuer count_q = 4, min value = 0
-        # distance min value = 0, max value = 14/4
-        # max value final_score = 7,5, min value = 0.25
-        normalized_score = ((final_score - 0.25) / 7.25) * 2 - 1
-        if color == "BLACK":
-            return normalized_score
-        else:
-            return -normalized_score
+    # normalize the final_score between -1 and 1
+    # max valuer count_q = 4, min value = 0
+    # distance min value = 0, max value = 14/4
+    # max value final_score = 7,5, min value = 0.25
+    normalized_score = ((final_score - 0.25) / 7.25) * 2 - 1
+    if color == "BLACK":
+        return normalized_score
+    else:
+        return -normalized_score
