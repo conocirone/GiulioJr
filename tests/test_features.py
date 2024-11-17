@@ -143,6 +143,22 @@ class TestFeatures(unittest.TestCase):
         self.assertEqual(win_move_king(b, "WHITE"), float("inf"))
         self.assertEqual(win_move_king(b, "BLACK"), float("-inf"))
 
+    def test_king_distance(self):
+        b = Board()
+        b.color_coords["KING"] = {(3, 3)}
+        b.color_coords["BLACK"] = {(6, 6)}
+        b.coords_color[(6, 6)] = "BLACK"
+        # Free quadrant
+        self.assertEqual(king_distance(b, "WHITE"), -((1.5 - 0.25) / 7.25 * 2 - 1))
+        self.assertEqual(king_distance(b, "BLACK"), ((1.5 - 0.25) / 7.25 * 2 - 1))
+
+        b.color_coords["BLACK"] = {(6, 6), (2, 1), (1, 2)}
+        b.coords_color[(2, 1)] = "BLACK"
+        b.coords_color[(1, 2)] = "BLACK"
+        # 1 black in quadrant with king
+        self.assertEqual(king_distance(b, "WHITE"), -((2 - 0.25) / 7.25 * 2 - 1))
+        self.assertEqual(king_distance(b, "BLACK"), ((2 - 0.25) / 7.25 * 2 - 1))
+
 
 if __name__ == "main":
     unittest.main()
