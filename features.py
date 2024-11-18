@@ -1,4 +1,4 @@
-from board import Board
+from board import Board, Color, Citadels
 
 
 def piece_score(state, color):
@@ -11,54 +11,15 @@ def piece_score(state, color):
     Returns:
         int: score between -1 and 1
     """
-    # white_count = len(state.color_coords["WHITE"])
-    # black_count = len(state.color_coords["BLACK"])
-    #
-    # # NOTE: Assumption white piece score is 2 and black piece 1.
-    # score = 2 * white_count - black_count
-    #
-    # normalized_score = score / 16
-    #
-    # if color == "WHITE":
-    #     return normalized_score
-    # return -normalized_score
+    white_count = len(state.color_coords[Color.WHITE])
+    black_count = len(state.color_coords[Color.BLACK])
 
-    w_score = 0
-    for w in state.color_coords["WHITE"]:
-        # w_score += (abs(w[0] - 4)+abs(w[1] - 4))/8 * 2 - 1
-        cnt = 0
-        if (
-            state.coords_color.get((w[0], w[1] + 1), None) is None
-            or state.coords_color.get((w[0], w[1] + 1), None) == "BLACK"
-        ):
-            cnt += 1
-        if (
-            state.coords_color.get((w[0] + 1, w[1]), None) is None
-            or state.coords_color.get((w[0] + 1, w[1]), None) == "BLACK"
-        ):
-            cnt += 1
-        if (
-            state.coords_color.get((w[0], w[1] - 1), None) is None
-            or state.coords_color.get((w[0], w[1] - 1), None) == "BLACK"
-        ):
-            cnt += 1
-        if (
-            state.coords_color.get((w[0] - 1, w[1]), None) is None
-            or state.coords_color.get((w[0] - 1, w[1]), None) == "BLACK"
-        ):
-            cnt += 1
+    # NOTE: Assumption white piece score is 2 and black piece 1.
+    score = 2 * white_count - black_count
 
-        w_score += cnt / 3 * 2 - 1
-    print(w_score)
+    normalized_score = score / 16
 
-    b_score = 0
-    k = state.get_king_coords()
-    for b in state.color_coords["BLACK"]:
-        b_score += 1 - (abs(b[0] - k[0]) + abs(b[1] - k[1])) / 7
-
-    normalized_score = (w_score - b_score) / 8
-
-    if color == "WHITE":
+    if color == Color.WHITE:
         return normalized_score
     return -normalized_score
 
@@ -86,45 +47,60 @@ def king_safety(state, color):
         required_for_capture = 2
 
     close_blacks = 0
-    if (
-        state.coords_color.get((king_position[0] - 1, king_position[1]), None)
-        == "BLACK"
-        or Board.coords_noenter.get((king_position[0] - 1, king_position[1]), "EMPTY")
-        in "LRUD"
+    if state.coords_color.get(
+        (king_position[0] - 1, king_position[1]), None
+    ) == Color.BLACK or Board.coords_noenter.get(
+        (king_position[0] - 1, king_position[1]), Color.EMPTY
+    ) in (
+        Citadels.L,
+        Citadels.R,
+        Citadels.D,
+        Citadels.U,
     ):  # Up square check
         close_blacks += 1
-    if (
-        state.coords_color.get((king_position[0] + 1, king_position[1]), None)
-        == "BLACK"
-        or Board.coords_noenter.get((king_position[0] + 1, king_position[1]), "EMPTY")
-        in "LRUD"
+    if state.coords_color.get(
+        (king_position[0] + 1, king_position[1]), None
+    ) == Color.BLACK or Board.coords_noenter.get(
+        (king_position[0] + 1, king_position[1]), Color.EMPTY
+    ) in (
+        Citadels.L,
+        Citadels.R,
+        Citadels.D,
+        Citadels.U,
     ):  # Down square check
         close_blacks += 1
-    if (
-        state.coords_color.get((king_position[0], king_position[1] - 1), None)
-        == "BLACK"
-        or Board.coords_noenter.get((king_position[0], king_position[1] - 1), "EMPTY")
-        in "LRUD"
+    if state.coords_color.get(
+        (king_position[0], king_position[1] - 1), None
+    ) == Color.BLACK or Board.coords_noenter.get(
+        (king_position[0], king_position[1] - 1), Color.EMPTY
+    ) in (
+        Citadels.L,
+        Citadels.R,
+        Citadels.D,
+        Citadels.U,
     ):  # Left square check
         close_blacks += 1
-    if (
-        state.coords_color.get((king_position[0], king_position[1] + 1), None)
-        == "BLACK"
-        or Board.coords_noenter.get((king_position[0], king_position[1] + 1), "EMPTY")
-        in "LRUD"
+    if state.coords_color.get(
+        (king_position[0], king_position[1] + 1), None
+    ) == Color.BLACK or Board.coords_noenter.get(
+        (king_position[0], king_position[1] + 1), Color.EMPTY
+    ) in (
+        Citadels.L,
+        Citadels.R,
+        Citadels.D,
+        Citadels.U,
     ):  # Right square check
         close_blacks += 1
 
     normalized_score = (required_for_capture - close_blacks) / 2 - 1
-    if color == "BLACK":
+    if color == Color.BLACK:
         return -normalized_score
     return normalized_score
 
 
 def capture_king(state, color):
     if state.get_king_coords() is None:
-        print("king is dead")
-        if color == "WHITE":
+        if color == Color.WHITE:
             return float("-inf")
         else:
             return float("inf")
@@ -135,7 +111,7 @@ def win_move_king(state, color):
     king_position = state.get_king_coords()
     found = False
     if king_position[1] in (0, 8) or king_position[0] in (0, 8):
-        if color == "WHITE":
+        if color == Color.WHITE:
             return float("inf")
         else:
             return float("-inf")
@@ -161,7 +137,7 @@ def win_move_king(state, color):
                 break
 
     if not found:  # not found
-        if color == "WHITE":
+        if color == Color.WHITE:
             return 100
         else:
             return -100
@@ -170,7 +146,7 @@ def win_move_king(state, color):
 
 def king_distance(state, color):
 
-    black_coords = state.color_coords["BLACK"]
+    black_coords = state.color_coords[Color.BLACK]
     king_position = state.get_king_coords()
 
     tr_angle = (0, 8)
@@ -233,10 +209,10 @@ def king_distance(state, color):
         elif b in hq_br:
             dict_q_br["row" + str(b[0])] = 1
 
-        count_q_tr = sum(dict_q_tr.values())
-        count_q_tl = sum(dict_q_tl.values())
-        count_q_bl = sum(dict_q_bl.values())
-        count_q_br = sum(dict_q_br.values())
+    count_q_tr = sum(dict_q_tr.values())
+    count_q_tl = sum(dict_q_tl.values())
+    count_q_bl = sum(dict_q_bl.values())
+    count_q_br = sum(dict_q_br.values())
 
     # manhattan distance from king to angles
     dist_tr = abs(king_position[0] - tr_angle[0]) + abs(king_position[1] - tr_angle[1])
@@ -259,6 +235,6 @@ def king_distance(state, color):
     # distance min value = 0, max value = 14/4
     # max value final_score = 7,5, min value = 0.25
     normalized_score = ((final_score - 0.25) / 7.25) * 2 - 1
-    if color == "BLACK":
+    if color == Color.BLACK:
         return normalized_score
     return -normalized_score

@@ -1,9 +1,17 @@
 import time
 import copy
 
+
 from board import Board
-from features import piece_score, king_safety, win_move_king, capture_king, king_distance
+from features import (
+    piece_score,
+    king_safety,
+    win_move_king,
+    capture_king,
+    king_distance,
+)
 from state import State, Player
+
 
 class Agent:
     def __init__(self, gateway, timeout, color, board):
@@ -13,15 +21,13 @@ class Agent:
         self.board = board
         self.timeout = timeout
 
-        
         # sends and receives messages
         while True:
             current_state, turn = gateway.get_state()
-            if turn == self.color:
+            if turn == self.color.name:
                 self.board.update(current_state)
 
                 # Define depth, timeout percentage
-                start_time = time.time()
                 move = self.iterative_deepening(time.time() + self.timeout * 0.95)
 
                 conv_move = self.convert_move(move)
@@ -39,32 +45,37 @@ class Agent:
         return chr(move[1] + 97) + str(move[0] + 1), chr(move[3] + 97) + str(
             move[2] + 1
         )
-        
 
     def iterative_deepening(self, time_limit):
         depth = 1
         best_move = None
         while time.time() < time_limit:
-            
-            move  = self.alphabeta_it(
-                time_limit = time_limit, 
-                depth = depth)
-            
+
+            move = self.alphabeta_it(time_limit=time_limit, depth=depth)
+
             if move is not None:
                 best_move = move
                 depth += 1
 
         if best_move is None:
-            best_move = self.board.get_available_moves(self.color)[0] 
+            best_move = self.board.get_available_moves(self.color)[0]
         return best_move
 
     def alphabeta_it(self, time_limit, depth):
-        root_state = State(self.board, None, float('-inf'), self.color, Player.MAX, float('-inf'), float('inf'))
+        root_state = State(
+            self.board,
+            None,
+            float("-inf"),
+            self.color,
+            Player.MAX,
+            float("-inf"),
+            float("inf"),
+        )
         L = [root_state]
 
-        state = root_state
-
         while not root_state.evaluated:
+
+            state = L[-1]
 
             if state.evaluated:
                 del L[-1]
@@ -74,20 +85,26 @@ class Agent:
                     if state.value > parent.value:
                         parent.value = state.value
                         parent.best_move = state.move
-                    if parent.value >= parent.beta:
-                        Board.history_table[parent.color][state.move] = depth**2
+                    parent.alpha = max(parent.alpha, parent.value)
+                    if parent.alpha >= parent.beta:
+                        # Board.history_table[parent.color][state.move] = (
+                        #     Board.history_table[parent.color].get(state.move, 0)
+                        #     + depth**2
+                        # )
                         parent.evaluated = True
                         continue
-                    parent.alpha = max(parent.alpha, parent.value)
-                else: 
+                else:
                     if state.value < parent.value:
                         parent.value = state.value
                         parent.best_move = state.move
-                    if parent.value <= parent.alpha:
-                        Board.history_table[parent.color][state.move] = depth**2
+                    parent.beta = min(parent.beta, parent.value)
+                    if parent.alpha >= parent.beta:
+                        # Board.history_table[parent.color][state.move] = (
+                        #     Board.history_table[parent.color].get(state.move, 0)
+                        #     + depth**2
+                        # )
                         parent.evaluated = True
                         continue
-                    parent.beta = min(parent.beta, parent.value)
 
                 next_state = parent.next_state()
                 if next_state != parent:
@@ -95,19 +112,17 @@ class Agent:
                 else:
                     parent.evaluated = True
 
-            elif len(L) == depth+1:
+            elif len(L) == depth + 1:
                 state.value = self.eval(state.board)
                 state.evaluated = True
 
             elif time.time() >= time_limit:
-                break
+                return None
 
             else:
                 next_state = state.next_state()
                 if next_state != state:
                     L.append(next_state)
-
-            state = L[-1]
 
         return root_state.best_move
 
@@ -118,10 +133,10 @@ class Agent:
 
     def eval(self, state):
         # Killer moves check
-        ck = capture_king(state, self.color) 
+        ck = capture_king(state, self.color)
         if ck != 0:
             return ck
-        
+
         wmk = win_move_king(state, self.color)
         if wmk != 0:
             return wmk
