@@ -102,21 +102,28 @@ class Board:
                     else:
                         break
 
-        heuristic_moves = []
-
-        i = 0
-        while i < len(moves):
-            move = moves[i]
-            if move in self.history_table[color]:
-                heuristic_moves.append((move, self.history_table[color][move]))
-                del moves[i]
-            else:
+        heuristic_moves = []  # (rating, move)
+        for m in moves:
+            rating = self.history_table[color].get(m, 0)
+            i = 0
+            while i < len(heuristic_moves):
+                if rating > heuristic_moves[i][0]:
+                    heuristic_moves.insert(i, (rating, m))
+                    break
                 i += 1
+            if i == len(heuristic_moves):
+                heuristic_moves.append((rating, m))
 
-        heuristic_moves.sort(key=lambda x: x[1], reverse=True)
-        sorted_moves = [move[0] for move in heuristic_moves] + moves
+        # i = 0
+        # while i < len(moves):
+        #     move = moves[i]
+        #     if move in self.history_table[color]:
+        #         heuristic_moves.append((move, self.history_table[color][move]))
+        #         del moves[i]
+        #     else:
+        #         i += 1
 
-        return sorted_moves
+        return [move for (_, move) in heuristic_moves]
 
     # Updates board state
     def update(self, board):

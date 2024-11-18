@@ -87,10 +87,10 @@ class Agent:
                         parent.best_move = state.move
                     parent.alpha = max(parent.alpha, parent.value)
                     if parent.alpha >= parent.beta:
-                        # Board.history_table[parent.color][state.move] = (
-                        #     Board.history_table[parent.color].get(state.move, 0)
-                        #     + depth**2
-                        # )
+                        Board.history_table[parent.color][parent.best_move] = (
+                            Board.history_table[parent.color].get(parent.best_move, 0)
+                            + 2 ** (depth - len(L) - 1)
+                        )
                         parent.evaluated = True
                         continue
                 else:
@@ -99,10 +99,10 @@ class Agent:
                         parent.best_move = state.move
                     parent.beta = min(parent.beta, parent.value)
                     if parent.alpha >= parent.beta:
-                        # Board.history_table[parent.color][state.move] = (
-                        #     Board.history_table[parent.color].get(state.move, 0)
-                        #     + depth**2
-                        # )
+                        Board.history_table[parent.color][parent.best_move] = (
+                            Board.history_table[parent.color].get(parent.best_move, 0)
+                            + 2 ** (depth - len(L) - 1)
+                        )
                         parent.evaluated = True
                         continue
 
@@ -111,6 +111,10 @@ class Agent:
                     L.append(next_state)
                 else:
                     parent.evaluated = True
+                    Board.history_table[parent.color][parent.best_move] = (
+                        Board.history_table[parent.color].get(parent.best_move, 0)
+                        + 2 ** (depth - len(L) - 1)
+                    )
 
             elif len(L) == depth + 1:
                 state.value = self.eval(state.board)
