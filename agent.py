@@ -6,9 +6,8 @@ from board import Board
 from features import (
     piece_score,
     king_safety,
-    win_move_king,
-    capture_king,
     king_distance,
+    king_free_road,
 )
 from state import State, Player
 
@@ -20,6 +19,7 @@ class Agent:
         self.color = color
         self.board = board
         self.timeout = timeout
+        self.draw_fifo = []
 
         # sends and receives messages
         while True:
@@ -27,11 +27,23 @@ class Agent:
             if turn == self.color.name:
                 self.board.update(current_state)
 
+                # Update draw_fifo
+                if len(self.draw_fifo) == 3:
+                    self.draw_fifo.pop(0)
+                self.draw_fifo.append(self.board.coords_color)
+
                 # Define depth, timeout percentage
                 move = self.iterative_deepening(time.time() + self.timeout * 0.95)
 
                 conv_move = self.convert_move(move)
                 self.gateway.send_state(conv_move)
+
+                # Updating draw FIFO
+                chosen_board = copy.deepcopy(self.board)
+                chosen_board.move_piece(move)
+                if len(self.draw_fifo) == 3:
+                    self.draw_fifo.pop(0)
+                self.draw_fifo.append(chosen_board.coords_color)
 
     def convert_move(self, move):
         """converts move indexes from integers to board format (letter-number)
@@ -61,7 +73,7 @@ class Agent:
 
         if best_move is None:
             best_move = self.board.get_available_moves(self.color)[0]
-        
+
         return best_move
 
     def alphabeta_it(self, time_limit, depth):
@@ -73,6 +85,7 @@ class Agent:
             Player.MAX,
             float("-inf"),
             float("inf"),
+            self.draw_fifo,
         )
         L = [root_state]
 
@@ -86,6 +99,7 @@ class Agent:
 
                 if parent.player == Player.MAX:
                     if state.value > parent.value:
+                        # parent.update_value(state.value)
                         parent.value = state.value
                         parent.best_move = state.move
                     parent.alpha = max(parent.alpha, parent.value)
@@ -133,20 +147,10 @@ class Agent:
 
         return root_state.best_move, root_state.val
 
-    def do_move(self, state, move):
-        new_board = copy.deepcopy(state)
-        new_board.move_piece(move)
-        return new_board
-
     def eval(self, state):
-        # Killer moves check
-        ck = capture_king(state, self.color)
-        if ck != 0:
-            return ck
-
-        wmk = win_move_king(state, self.color)
-        if wmk != 0:
-            return wmk
+        kfr = king_free_road(state, self.color)
+        if kfr != 0:
+            return kfr
 
         # Feature linear combination
         s = 0
