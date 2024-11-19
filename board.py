@@ -113,16 +113,7 @@ class Board:
                 i += 1
             if i == len(heuristic_moves):
                 heuristic_moves.append((rating, m))
-
-        # i = 0
-        # while i < len(moves):
-        #     move = moves[i]
-        #     if move in self.history_table[color]:
-        #         heuristic_moves.append((move, self.history_table[color][move]))
-        #         del moves[i]
-        #     else:
-        #         i += 1
-
+        
         return [move for (_, move) in heuristic_moves]
 
     # Updates board state

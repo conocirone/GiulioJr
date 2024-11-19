@@ -51,14 +51,17 @@ class Agent:
         best_move = None
         while time.time() < time_limit:
 
-            move = self.alphabeta_it(time_limit=time_limit, depth=depth)
+            move, value = self.alphabeta_it(time_limit=time_limit, depth=depth)
 
             if move is not None:
                 best_move = move
                 depth += 1
 
+            print(f"{self.color.name}: depth: {depth}, value: {value}")
+
         if best_move is None:
             best_move = self.board.get_available_moves(self.color)[0]
+        
         return best_move
 
     def alphabeta_it(self, time_limit, depth):
@@ -121,14 +124,14 @@ class Agent:
                 state.evaluated = True
 
             elif time.time() >= time_limit:
-                return None
+                return None, None
 
             else:
                 next_state = state.next_state()
                 if next_state != state:
                     L.append(next_state)
 
-        return root_state.best_move
+        return root_state.best_move, root_state.val
 
     def do_move(self, state, move):
         new_board = copy.deepcopy(state)
