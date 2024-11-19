@@ -1,4 +1,6 @@
+
 from board import Board, Color, Citadels
+
 
 
 def piece_score(state, color):
@@ -37,16 +39,18 @@ def king_safety(state, color):
     """
     king_position = state.get_king_coords()
 
+
     if king_position == (4, 4):  # king oh throne
         required_for_capture = 4
 
     elif king_position in ((4, 5), (5, 4), (4, 3), (3, 4)):  # king next to throne
         required_for_capture = 3
-
+    
     else:
         required_for_capture = 2
 
     close_blacks = 0
+
     if state.coords_color.get(
         (king_position[0] - 1, king_position[1]), None
     ) == Color.BLACK or Board.coords_noenter.get(

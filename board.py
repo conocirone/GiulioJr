@@ -215,6 +215,7 @@ class Board:
                 del self.coords_color[next_coords]
                 self.color_coords[next_square].remove(next_coords)
 
+
         # color in Color.WHITE, Color.BLACK
         # next_square in Color.WHITE, Color.BLACK, Color.KING, Color.EMPTY
         elif next_square != Color.EMPTY and color == 1 - (next_square % 2):
