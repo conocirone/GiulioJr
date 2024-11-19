@@ -75,6 +75,6 @@ class State:
 
     @staticmethod
     def do_move(self, move):
-        new_board = copy.deepcopy(self.board)
+        new_board = deepcopy(self.board)
         new_board.move_piece(move)
         return new_board
