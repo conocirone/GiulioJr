@@ -1,6 +1,7 @@
 from enum import Enum
 import copy
 from board import Color
+from operator import xor
 
 
 class Player(Enum):
@@ -21,7 +22,10 @@ class State:
         self.best_move = None
         self.available_moves_iterator = iter(self.board.get_available_moves(self.color))
         self.evaluated = False
-
+    
+    def __hash__(self):
+        return xor(hash(frozenset(self.board.color_coords[Color.WHITE])), hash(frozenset(self.board.color_coords[Color.BLACK])))
+        
     def next_state(self):
         try:
             next_move = next(self.available_moves_iterator)

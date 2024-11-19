@@ -11,6 +11,7 @@ from features import (
     king_distance,
 )
 from state import State, Player
+import random
 
 
 class Agent:
@@ -20,6 +21,10 @@ class Agent:
         self.color = color
         self.board = board
         self.timeout = timeout
+        #initialize with random values
+        self.transposition_table = {}
+        self.transposition_table_size = 2**22
+        self.nodes = 0
 
         # sends and receives messages
         while True:
@@ -45,23 +50,43 @@ class Agent:
         return chr(move[1] + 97) + str(move[0] + 1), chr(move[3] + 97) + str(
             move[2] + 1
         )
+    
 
+    def put_in_transposition_table(self, key, search_depth, move, value, color, flag):
+        if len(self.transposition_table) >= self.transposition_table_size:
+            print("transposition table full")
+            self.transposition_table.popitem()
+        self.transposition_table[key, color] = [search_depth, move, value, flag]
+        
+
+    def get_from_tansposition_table(self, key, search_depth, alpha, beta, color):
+        if key in self.transposition_table.keys():
+            t_entry = self.transposition_table[key, color]
+            if t_entry[0] >= search_depth:
+                if t_entry[3] == "EXACT":
+                    return t_entry[2]
+                elif t_entry[3] == "ALPHA" and t_entry[2] <= alpha:
+                    return alpha
+                elif t_entry[3] == "BETA" and t_entry[2] >= beta:
+                    return beta
+        return None
+                
+    
     def iterative_deepening(self, time_limit):
         depth = 1
         best_move = None
         while time.time() < time_limit:
-
             move, value = self.alphabeta_it(time_limit=time_limit, depth=depth)
-
             if move is not None:
                 best_move = move
                 depth += 1
+            
 
             print(f"{self.color.name}: depth: {depth}, value: {value}")
 
         if best_move is None:
             best_move = self.board.get_available_moves(self.color)[0]
-        
+        print(f'Number of explored nodes: {self.nodes}')
         return best_move
 
     def alphabeta_it(self, time_limit, depth):
@@ -75,11 +100,12 @@ class Agent:
             float("inf"),
         )
         L = [root_state]
-
+        
         while not root_state.evaluated:
-
+            
             state = L[-1]
-
+            
+            
             if state.evaluated:
                 del L[-1]
                 parent = L[-1]
@@ -90,11 +116,13 @@ class Agent:
                         parent.best_move = state.move
                     parent.alpha = max(parent.alpha, parent.value)
                     if parent.alpha >= parent.beta:
+                        #beta cut-off
                         Board.history_table[parent.color][parent.best_move] = (
                             Board.history_table[parent.color].get(parent.best_move, 0)
                             + 2 ** (depth - len(L) - 1)
                         )
                         parent.evaluated = True
+                        self.put_in_transposition_table(state.__hash__(), depth, state.move, state.value, state.color, "BETA")
                         continue
                 else:
                     if state.value < parent.value:
@@ -102,11 +130,13 @@ class Agent:
                         parent.best_move = state.move
                     parent.beta = min(parent.beta, parent.value)
                     if parent.alpha >= parent.beta:
+                        #alpha cut-off
                         Board.history_table[parent.color][parent.best_move] = (
                             Board.history_table[parent.color].get(parent.best_move, 0)
                             + 2 ** (depth - len(L) - 1)
                         )
                         parent.evaluated = True
+                        self.put_in_transposition_table(state.__hash__(), depth, state.move, state.value, state.color, "ALPHA")
                         continue
 
                 next_state = parent.next_state()
@@ -121,7 +151,10 @@ class Agent:
 
             elif len(L) == depth + 1:
                 state.value = self.eval(state.board)
+                self.put_in_transposition_table(state.__hash__(), depth, state.move, state.value, state.color, "EXACT")
                 state.evaluated = True
+                self.nodes += 1
+                
 
             elif time.time() >= time_limit:
                 return None, None
@@ -130,13 +163,15 @@ class Agent:
                 next_state = state.next_state()
                 if next_state != state:
                     L.append(next_state)
-
-        return root_state.best_move, root_state.val
-
-    def do_move(self, state, move):
-        new_board = copy.deepcopy(state)
-        new_board.move_piece(move)
-        return new_board
+            
+            
+            state_key = state.__hash__()  
+            corresponding_entry = self.get_from_tansposition_table(state_key, depth, state.alpha, state.beta, state.color)
+            if corresponding_entry is not None:
+               state.evaluated = True
+               state.value = corresponding_entry
+            
+        return root_state.best_move, root_state.value
 
     def eval(self, state):
         # Killer moves check
