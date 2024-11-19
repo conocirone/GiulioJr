@@ -1,6 +1,4 @@
-
 from board import Board, Color, Citadels
-
 
 
 def piece_score(state, color):
@@ -27,6 +25,7 @@ def piece_score(state, color):
 
 
 # WHITE features
+# TODO: divide in two features
 def king_safety(state, color):
     """
     Returns safety score: number of black pieces missing for king capture
@@ -39,13 +38,12 @@ def king_safety(state, color):
     """
     king_position = state.get_king_coords()
 
-
     if king_position == (4, 4):  # king oh throne
         required_for_capture = 4
 
     elif king_position in ((4, 5), (5, 4), (4, 3), (3, 4)):  # king next to throne
         required_for_capture = 3
-    
+
     else:
         required_for_capture = 2
 
@@ -113,38 +111,11 @@ def capture_king(state, color):
 
 def win_move_king(state, color):
     king_position = state.get_king_coords()
-    found = False
     if king_position[1] in (0, 8) or king_position[0] in (0, 8):
         if color == Color.WHITE:
             return float("inf")
         else:
             return float("-inf")
-
-    if king_position[0] not in (2, 6) and king_position[1] not in (2, 6):
-        return 0
-
-    if king_position[0] in (2, 6):
-        for col in range(9):
-            if state.coords_color.get((king_position[0], col), None) is not None and (
-                king_position[0],
-                col,
-            ) != (king_position[0], king_position[1]):
-                found = True
-                break
-    elif king_position[1] in (2, 6):
-        for row in range(9):
-            if state.coords_color.get((row, king_position[1]), None) is not None and (
-                row,
-                king_position[1],
-            ) != (king_position[0], king_position[1]):
-                found = True
-                break
-
-    if not found:  # not found
-        if color == Color.WHITE:
-            return 100
-        else:
-            return -100
     return 0
 
 
@@ -242,3 +213,45 @@ def king_distance(state, color):
     if color == Color.BLACK:
         return normalized_score
     return -normalized_score
+
+
+def draw_check(state, color, draw_fifo):
+    # check if state is different from first item in FIFO queue
+    # if True
+    draw_found = True
+    for key in (Color.KING, Color.WHITE, Color.BLACK):
+        if state.color_coords[key] != draw_fifo[0][key]:
+            draw_found = False
+            break
+    return draw_found
+
+
+def king_free_road(state, color):
+    king_position = state.get_king_coords()
+    found = False
+    if king_position[0] not in (2, 6) and king_position[1] not in (2, 6):
+        return 0
+
+    if king_position[0] in (2, 6):
+        for col in range(9):
+            if state.coords_color.get((king_position[0], col), None) is not None and (
+                king_position[0],
+                col,
+            ) != (king_position[0], king_position[1]):
+                found = True
+                break
+    elif king_position[1] in (2, 6):
+        for row in range(9):
+            if state.coords_color.get((row, king_position[1]), None) is not None and (
+                row,
+                king_position[1],
+            ) != (king_position[0], king_position[1]):
+                found = True
+                break
+
+    if not found:  # not found
+        if color == Color.WHITE:
+            return 100
+        else:
+            return -100
+    return 0
