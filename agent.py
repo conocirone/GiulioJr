@@ -30,7 +30,7 @@ class Agent:
                 # Update draw_fifo
                 if len(self.draw_fifo) == 3:
                     self.draw_fifo.pop(0)
-                self.draw_fifo.append(self.board.coords_color)
+                self.draw_fifo.append(self.board.color_coords)
 
                 # Define depth, timeout percentage
                 move = self.iterative_deepening(time.time() + self.timeout * 0.95)
@@ -43,7 +43,7 @@ class Agent:
                 chosen_board.move_piece(move)
                 if len(self.draw_fifo) == 3:
                     self.draw_fifo.pop(0)
-                self.draw_fifo.append(chosen_board.coords_color)
+                self.draw_fifo.append(chosen_board.color_coords)
 
     def convert_move(self, move):
         """converts move indexes from integers to board format (letter-number)
@@ -67,9 +67,8 @@ class Agent:
 
             if move is not None:
                 best_move = move
+                print(f"{self.color.name}: depth: {depth}, value: {value}")
                 depth += 1
-
-            print(f"{self.color.name}: depth: {depth}, value: {value}")
 
         if best_move is None:
             best_move = self.board.get_available_moves(self.color)[0]
@@ -99,7 +98,6 @@ class Agent:
 
                 if parent.player == Player.MAX:
                     if state.value > parent.value:
-                        # parent.update_value(state.value)
                         parent.value = state.value
                         parent.best_move = state.move
                     parent.alpha = max(parent.alpha, parent.value)
@@ -145,7 +143,7 @@ class Agent:
                 if next_state != state:
                     L.append(next_state)
 
-        return root_state.best_move, root_state.val
+        return root_state.best_move, root_state.value
 
     def eval(self, state):
         kfr = king_free_road(state, self.color)
