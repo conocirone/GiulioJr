@@ -28,21 +28,24 @@ class State:
         if ck != 0:
             self.value = ck
             self.evaluated = True
+            return
 
         wmk = win_move_king(self.board, self.color)
         if wmk != 0:
             self.value = wmk
             self.evaluated = True
+            return
 
-        if draw_check(self.board, self.color, draw_fifo):
+        if draw_check(self.board, draw_fifo):
             self.value = 0
             self.evaluated = True
+            return
 
-        # Set state's draw_fifo
+        # Update state's draw_fifo
         self.draw_fifo = draw_fifo
         if len(self.draw_fifo) == 3:
             self.draw_fifo.pop(0)
-        self.draw_fifo.append(self.board.coords_color)
+        self.draw_fifo.append(self.board.color_coords)
 
     def next_state(self):
         try:
@@ -63,7 +66,7 @@ class State:
             child_color = Color.WHITE
 
         return State(
-            self.do_move(next_move),
+            self.do_move(self, next_move),
             next_move,
             child_value,
             child_color,
