@@ -113,7 +113,15 @@ class Agent:
             state = L[-1]
             
             
-            if state.evaluated:
+            if not state.evaluated:
+                state_key = state.__hash__()  
+                corresponding_entry = self.get_from_tansposition_table(state_key, len(L) - 1, state.alpha, state.beta, state.color)
+                if corresponding_entry is not None:
+                    state.evaluated = True
+                    state.value = corresponding_entry
+            
+            
+            elif state.evaluated:
                 del L[-1]
                 parent = L[-1]
 
@@ -173,11 +181,7 @@ class Agent:
                     L.append(next_state)
             
             
-            state_key = state.__hash__()  
-            corresponding_entry = self.get_from_tansposition_table(state_key, depth, state.alpha, state.beta, state.color)
-            if corresponding_entry is not None:
-               state.evaluated = True
-               state.value = corresponding_entry
+
             
         return root_state.best_move, root_state.value
 
