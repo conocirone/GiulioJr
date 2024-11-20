@@ -122,7 +122,7 @@ class Agent:
                             + 2 ** (depth - len(L) - 1)
                         )
                         parent.evaluated = True
-                        self.put_in_transposition_table(state.__hash__(), depth, state.move, state.value, state.color, "BETA")
+                        self.put_in_transposition_table(parent.__hash__(), (len(L) - 1), parent.move, parent.value, parent.color, "BETA")
                         continue
                 else:
                     if state.value < parent.value:
@@ -136,7 +136,7 @@ class Agent:
                             + 2 ** (depth - len(L) - 1)
                         )
                         parent.evaluated = True
-                        self.put_in_transposition_table(state.__hash__(), depth, state.move, state.value, state.color, "ALPHA")
+                        self.put_in_transposition_table(parent.__hash__(), (len(L) - 1), parent.move, parent.value, parent.color, "ALPHA")
                         continue
 
                 next_state = parent.next_state()
@@ -151,7 +151,7 @@ class Agent:
 
             elif len(L) == depth + 1:
                 state.value = self.eval(state.board)
-                self.put_in_transposition_table(state.__hash__(), depth, state.move, state.value, state.color, "EXACT")
+                self.put_in_transposition_table(state.__hash__(), len(L) - 1, state.move, state.value, state.color, "EXACT")
                 state.evaluated = True
                 self.nodes += 1
                 
