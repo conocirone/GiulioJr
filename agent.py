@@ -57,7 +57,10 @@ class Agent:
         if len(self.transposition_table) >= self.transposition_table_size:
             print("transposition table full")
             self.transposition_table.popitem()
-        self.transposition_table[(key, color)] = [search_depth, move, value, flag]
+        if (key, color) in self.transposition_table.keys():
+            if self.transposition_table[(key, color)][0] < search_depth:
+                print("overwriting entry")
+                self.transposition_table[(key, color)] = [search_depth, move, value, flag]
         
 
     def get_from_tansposition_table(self, key, search_depth, alpha, beta, color):
@@ -83,13 +86,9 @@ class Agent:
                 best_move = move
                 depth += 1
                 print(f"{self.color.name}: depth: {depth}, value: {value}")
-            
-
-            
-
+                
         if best_move is None:
             best_move = self.board.get_available_moves(self.color)[0]
-        
         
         print(f'Number of explored nodes: {self.nodes}')
         print(f'Number of cache hits: {self.cache_hits}')
@@ -154,6 +153,7 @@ class Agent:
                         Board.history_table[parent.color].get(parent.best_move, 0)
                         + 2 ** (depth - len(L) - 1)
                     )
+                    self.put_in_transposition_table(parent.__hash__(), (len(L) - 1), parent.move, parent.value, parent.color, "EXACT")
 
             elif len(L) == depth + 1:
                 state.value = self.eval(state.board)
