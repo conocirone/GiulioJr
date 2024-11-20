@@ -25,6 +25,7 @@ class Agent:
         self.transposition_table = {}
         self.transposition_table_size = 2**22
         self.nodes = 0
+        self.cache_hits = 0
 
         # sends and receives messages
         while True:
@@ -62,6 +63,7 @@ class Agent:
     def get_from_tansposition_table(self, key, search_depth, alpha, beta, color):
         if (key, color) in self.transposition_table.keys():
             t_entry = self.transposition_table[(key, color)]
+            self.cache_hits += 1
             if t_entry[0] >= search_depth:
                 if t_entry[3] == "EXACT":
                     return t_entry[2]
@@ -80,13 +82,17 @@ class Agent:
             if move is not None:
                 best_move = move
                 depth += 1
+                print(f"{self.color.name}: depth: {depth}, value: {value}")
             
 
-            print(f"{self.color.name}: depth: {depth}, value: {value}")
+            
 
         if best_move is None:
             best_move = self.board.get_available_moves(self.color)[0]
+        
+        
         print(f'Number of explored nodes: {self.nodes}')
+        print(f'Number of cache hits: {self.cache_hits}')
         return best_move
 
     def alphabeta_it(self, time_limit, depth):
