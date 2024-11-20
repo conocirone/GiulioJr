@@ -56,12 +56,12 @@ class Agent:
         if len(self.transposition_table) >= self.transposition_table_size:
             print("transposition table full")
             self.transposition_table.popitem()
-        self.transposition_table[key, color] = [search_depth, move, value, flag]
+        self.transposition_table[(key, color)] = [search_depth, move, value, flag]
         
 
     def get_from_tansposition_table(self, key, search_depth, alpha, beta, color):
-        if key in self.transposition_table.keys():
-            t_entry = self.transposition_table[key, color]
+        if (key, color) in self.transposition_table.keys():
+            t_entry = self.transposition_table[(key, color)]
             if t_entry[0] >= search_depth:
                 if t_entry[3] == "EXACT":
                     return t_entry[2]
