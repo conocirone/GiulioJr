@@ -61,6 +61,8 @@ class Agent:
             if self.transposition_table[(key, color)][0] < search_depth:
                 print("overwriting entry")
                 self.transposition_table[(key, color)] = [search_depth, move, value, flag]
+        else:
+            self.transposition_table[(key, color)] = [search_depth, move, value, flag]
         
 
     def get_from_tansposition_table(self, key, search_depth, alpha, beta, color):
