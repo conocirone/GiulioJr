@@ -215,9 +215,9 @@ def king_distance(state, color):
     return -normalized_score
 
 
-def draw_check(state, color, draw_fifo):
-    # check if state is different from first item in FIFO queue
-    # if True
+def draw_check(state, draw_fifo):
+    if len(draw_fifo) < 3:
+        return False
     draw_found = True
     for key in (Color.KING, Color.WHITE, Color.BLACK):
         if state.color_coords[key] != draw_fifo[0][key]:
