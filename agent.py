@@ -83,7 +83,9 @@ class Agent:
         depth = 1
         best_move = None
         while time.time() < time_limit:
+            print('Starting alhapbeta search')
             move, value = self.alphabeta_it(time_limit=time_limit, depth=depth)
+            print('Finished alphabeta search')
             if move is not None:
                 best_move = move
                 depth += 1
