@@ -94,14 +94,15 @@ class Agent:
     def iterative_deepening(self, time_limit):
         depth = 1
         best_move = None
-        while time.time() < time_limit:
+        max_depth = 100
+        while time.time() < time_limit and depth <= max_depth:
             move, value = self.alphabeta_it(time_limit=time_limit, depth=depth)
             if move is not None:
                 best_move = move
                 print(f"{self.color.name}: depth: {depth}, value: {value}, nodes: {self.nodes}, cache_hits: {self.cache_hits}")
                 depth += 1
                 
-                
+            
         if best_move is None:
             best_move = self.board.get_available_moves(self.color)[0]
         
