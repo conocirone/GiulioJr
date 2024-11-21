@@ -85,7 +85,7 @@ class Agent:
             if move is not None:
                 best_move = move
                 depth += 1
-                print(f"{self.color.name}: depth: {depth}, value: {value}")
+                print(f"{self.color.name}: depth: {depth}, value: {value}, nodes: {self.nodes}, cache_hits: {self.cache_hits}")
                 
         if best_move is None:
             best_move = self.board.get_available_moves(self.color)[0]
