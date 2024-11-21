@@ -23,7 +23,7 @@ class Agent:
         self.draw_fifo = []
         #initialize with random values
         self.transposition_table = {}
-        self.transposition_table_size = 2**22
+        self.transposition_table_size = 2**16
         self.nodes = 0
         self.cache_hits = 0
         
@@ -98,12 +98,13 @@ class Agent:
             move, value = self.alphabeta_it(time_limit=time_limit, depth=depth)
             if move is not None:
                 best_move = move
-                print(f"{self.color.name}: depth: {depth}, value: {value:.2f}, move: {self.convert_move(best_move)}")
+                print(f"{self.color.name}: depth: {depth}, value: {value}, nodes: {self.nodes}, cache_hits: {self.cache_hits}")
                 depth += 1
-
+                
+                
         if best_move is None:
             best_move = self.board.get_available_moves(self.color)[0]
-
+        
         return best_move
 
     def alphabeta_it(self, time_limit, depth):
