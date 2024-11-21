@@ -43,9 +43,10 @@ class State:
 
         # Update state's draw_fifo
         self.draw_fifo = draw_fifo
-        if len(self.draw_fifo) == 3:
-            self.draw_fifo.pop(0)
-        self.draw_fifo.append(self.board.color_coords)
+        if move is not None:
+            if len(self.draw_fifo) == 3:
+                self.draw_fifo.pop(0)
+            self.draw_fifo.append(self.board.color_coords)
 
     def next_state(self):
         try:
