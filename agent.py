@@ -6,9 +6,8 @@ from board import Board
 from features import (
     piece_score,
     king_safety,
-    win_move_king,
-    capture_king,
     king_distance,
+    king_free_road,
 )
 from state import State, Player
 import random
@@ -21,23 +20,38 @@ class Agent:
         self.color = color
         self.board = board
         self.timeout = timeout
+        self.draw_fifo = []
         #initialize with random values
         self.transposition_table = {}
         self.transposition_table_size = 2**22
         self.nodes = 0
         self.cache_hits = 0
-
+        
         # sends and receives messages
         while True:
             current_state, turn = gateway.get_state()
             if turn == self.color.name:
                 self.board.update(current_state)
 
+                # Update draw_fifo
+                if len(self.draw_fifo) == 4:
+                    self.draw_fifo.pop(0)
+                self.draw_fifo.append(self.board.color_coords)
+
                 # Define depth, timeout percentage
                 move = self.iterative_deepening(time.time() + self.timeout * 0.95)
 
                 conv_move = self.convert_move(move)
                 self.gateway.send_state(conv_move)
+
+                # Updating draw FIFO
+                chosen_board = copy.deepcopy(self.board)
+                chosen_board.move_piece(move)
+                if len(self.draw_fifo) == 4:
+                    self.draw_fifo.pop(0)
+                self.draw_fifo.append(chosen_board.color_coords)
+
+                print("Waiting opponent:\n")
 
     def convert_move(self, move):
         """converts move indexes from integers to board format (letter-number)
@@ -84,12 +98,12 @@ class Agent:
             move, value = self.alphabeta_it(time_limit=time_limit, depth=depth)
             if move is not None:
                 best_move = move
+                print(f"{self.color.name}: depth: {depth}, value: {value:.2f}, move: {self.convert_move(best_move)}")
                 depth += 1
-                print(f"{self.color.name}: depth: {depth}, value: {value}, nodes: {self.nodes}, cache_hits: {self.cache_hits}")
-                
+
         if best_move is None:
             best_move = self.board.get_available_moves(self.color)[0]
-        
+
         return best_move
 
     def alphabeta_it(self, time_limit, depth):
@@ -101,6 +115,8 @@ class Agent:
             Player.MAX,
             float("-inf"),
             float("inf"),
+            self.draw_fifo,
+            self.color
         )
         L = [root_state]
         
@@ -129,9 +145,8 @@ class Agent:
                         parent.best_move = state.move
                     parent.alpha = max(parent.alpha, parent.value)
                     if parent.alpha >= parent.beta:
-                        #beta cut-off
-                        Board.history_table[parent.color][parent.best_move] = (
-                            Board.history_table[parent.color].get(parent.best_move, 0)
+                        Board.history_table[parent.color.value][parent.best_move] = (
+                            Board.history_table[parent.color.value].get(parent.best_move, 0)
                             + 2 ** (depth - len(L) - 1)
                         )
                         parent.evaluated = True
@@ -143,9 +158,8 @@ class Agent:
                         parent.best_move = state.move
                     parent.beta = min(parent.beta, parent.value)
                     if parent.alpha >= parent.beta:
-                        #alpha cut-off
-                        Board.history_table[parent.color][parent.best_move] = (
-                            Board.history_table[parent.color].get(parent.best_move, 0)
+                        Board.history_table[parent.color.value][parent.best_move] = (
+                            Board.history_table[parent.color.value].get(parent.best_move, 0)
                             + 2 ** (depth - len(L) - 1)
                         )
                         parent.evaluated = True
@@ -156,11 +170,11 @@ class Agent:
                 if next_state != parent:
                     L.append(next_state)
                 else:
-                    parent.evaluated = True
-                    Board.history_table[parent.color][parent.best_move] = (
-                        Board.history_table[parent.color].get(parent.best_move, 0)
+                    Board.history_table[parent.color.value][parent.best_move] = (
+                        Board.history_table[parent.color.value].get(parent.best_move, 0)
                         + 2 ** (depth - len(L) - 1)
                     )
+                    parent.evaluated = True
                     self.put_in_transposition_table(parent.__hash__(), (depth - len(L) - 1), parent.best_move, parent.value, parent.color, "EXACT")
 
             elif len(L) == depth + 1:
@@ -177,19 +191,12 @@ class Agent:
                 if next_state != state:
                     L.append(next_state)
             
-
-            
         return root_state.best_move, root_state.value
 
     def eval(self, state):
-        # Killer moves check
-        ck = capture_king(state, self.color)
-        if ck != 0:
-            return ck
-
-        wmk = win_move_king(state, self.color)
-        if wmk != 0:
-            return wmk
+        kfr = king_free_road(state, self.color)
+        if kfr != 0:
+            return kfr
 
         # Feature linear combination
         s = 0
