@@ -216,13 +216,15 @@ def king_distance(state, color):
 
 
 def draw_check(state, draw_fifo):
-    if len(draw_fifo) < 3:
+    if len(draw_fifo) < 4:
         return False
+
     draw_found = True
     for key in (Color.KING, Color.WHITE, Color.BLACK):
-        if state.color_coords[key] != draw_fifo[0][key]:
+        if state[key] != draw_fifo[0][key]:
             draw_found = False
             break
+
     return draw_found
 
 

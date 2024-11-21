@@ -58,11 +58,6 @@ class Board:
         else:
             pieces = (Color.BLACK,)
 
-        # for move, value in  self.history_table[color].items():
-        #     from_move = (move[0], move[1])
-
-        #     if color == 'WHITE' and (from_move in self.color_coords['KING'] or :
-
         moves = []
         for piece in pieces:
             coords = self.color_coords[piece]
@@ -104,7 +99,7 @@ class Board:
 
         heuristic_moves = []  # (rating, move)
         for m in moves:
-            rating = self.history_table[color].get(m, 0)
+            rating = self.history_table[color.value].get(m, 0)
             i = 0
             while i < len(heuristic_moves):
                 if rating > heuristic_moves[i][0]:
@@ -113,7 +108,7 @@ class Board:
                 i += 1
             if i == len(heuristic_moves):
                 heuristic_moves.append((rating, m))
-        
+
         return [move for (_, move) in heuristic_moves]
 
     # Updates board state
@@ -242,3 +237,16 @@ class Board:
             return temp.pop()
         except KeyError:
             return None
+
+    def __repr__(self):
+        res = ""
+        for i in range(9):
+            for j in range(9):
+                color = self.coords_color.get((i,j), None)
+                if color is None:
+                    res += f"{'*':^6}"
+                else:
+                    res += f"{color.name:^6}"
+            res += '\n'
+
+        return res
