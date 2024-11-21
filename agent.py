@@ -63,7 +63,8 @@ class Agent:
     def iterative_deepening(self, time_limit):
         depth = 1
         best_move = None
-        while time.time() < time_limit:
+        max_depth = 100
+        while time.time() < time_limit and depth <= max_depth:
 
             move, value = self.alphabeta_it(time_limit=time_limit, depth=depth)
 
