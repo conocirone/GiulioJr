@@ -46,9 +46,10 @@ class State:
         if move is None:
             self.draw_fifo = draw_fifo
         else:
+            self.draw_fifo = draw_fifo
             if len(draw_fifo) == 4:
                 draw_fifo.pop(0)
-            self.draw_fifo = draw_fifo + [self.board.color_coords]
+            self.draw_fifo.append(self.board.color_coords)
 
     def next_state(self):
         try:
@@ -77,7 +78,7 @@ class State:
             child_player,
             self.alpha,
             self.beta,
-            self.draw_fifo,
+            deepcopy(self.draw_fifo),
             self.root_color
         )
 
