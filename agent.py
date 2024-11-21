@@ -100,7 +100,7 @@ class Agent:
                 parent = L[-1]
 
                 if parent.player == Player.MAX:
-                    if state.value > parent.value:
+                    if state.value >= parent.value:
                         parent.value = state.value
                         parent.best_move = state.move
                     parent.alpha = max(parent.alpha, parent.value)
@@ -112,7 +112,7 @@ class Agent:
                         parent.evaluated = True
                         continue
                 else:
-                    if state.value < parent.value:
+                    if state.value <= parent.value:
                         parent.value = state.value
                         parent.best_move = state.move
                     parent.beta = min(parent.beta, parent.value)
