@@ -105,7 +105,9 @@ class Agent:
             
         if best_move is None:
             best_move = self.board.get_available_moves(self.color)[0]
-        
+            
+        self.nodes = 0  
+        self.cache_hits = 0
         return best_move
 
     def alphabeta_it(self, time_limit, depth):
