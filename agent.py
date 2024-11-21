@@ -10,6 +10,7 @@ from features import (
     king_free_road,
 )
 from state import State, Player
+import random
 
 
 class Agent:
@@ -20,7 +21,12 @@ class Agent:
         self.board = board
         self.timeout = timeout
         self.draw_fifo = []
-
+        #initialize with random values
+        self.transposition_table = {}
+        self.transposition_table_size = 2**22
+        self.nodes = 0
+        self.cache_hits = 0
+        
         # sends and receives messages
         while True:
             current_state, turn = gateway.get_state()
@@ -59,14 +65,37 @@ class Agent:
         return chr(move[1] + 97) + str(move[0] + 1), chr(move[3] + 97) + str(
             move[2] + 1
         )
+    
 
+    def put_in_transposition_table(self, key, search_depth, move, value, color, flag):
+        if len(self.transposition_table) >= self.transposition_table_size:
+            self.transposition_table.popitem()
+        if (key, color) in self.transposition_table.keys():
+            if self.transposition_table[(key, color)][0] < search_depth:
+                self.transposition_table[(key, color)] = [search_depth, move, value, flag]
+        else:
+            self.transposition_table[(key, color)] = [search_depth, move, value, flag]
+        
+
+    def get_from_tansposition_table(self, key, search_depth, alpha, beta, color):
+        if (key, color) in self.transposition_table.keys():
+            t_entry = self.transposition_table[(key, color)]
+            self.cache_hits += 1
+            if t_entry[0] >= search_depth:
+                if t_entry[3] == "EXACT":
+                    return t_entry[1], t_entry[2]
+                elif t_entry[3] == "ALPHA" and t_entry[2] <= alpha:
+                    return t_entry[1], alpha
+                elif t_entry[3] == "BETA" and t_entry[2] >= beta:
+                    return t_entry[1], beta
+        return None, None
+                
+    
     def iterative_deepening(self, time_limit):
         depth = 1
         best_move = None
         while time.time() < time_limit:
-
             move, value = self.alphabeta_it(time_limit=time_limit, depth=depth)
-
             if move is not None:
                 best_move = move
                 print(f"{self.color.name}: depth: {depth}, value: {value:.2f}, move: {self.convert_move(best_move)}")
@@ -90,11 +119,22 @@ class Agent:
             self.color
         )
         L = [root_state]
-
+        
         while not root_state.evaluated:
-
+            
             state = L[-1]
-
+            
+            
+            state_key = state.__hash__()  
+            t_move, t_value = self.get_from_tansposition_table(state_key, depth - len(L) - 1, state.alpha, state.beta, state.color)
+            if t_move is not None and t_value is not None:
+                state.evaluated = True
+                state.value = t_value
+                state.best_move = t_move
+                if state is root_state:
+                    break
+            
+            
             if state.evaluated:
                 del L[-1]
                 parent = L[-1]
@@ -110,6 +150,7 @@ class Agent:
                             + 2 ** (depth - len(L) - 1)
                         )
                         parent.evaluated = True
+                        self.put_in_transposition_table(parent.__hash__(), ( depth - len(L) - 1), parent.best_move, parent.value, parent.color, "BETA")
                         continue
                 else:
                     if state.value < parent.value:
@@ -122,6 +163,7 @@ class Agent:
                             + 2 ** (depth - len(L) - 1)
                         )
                         parent.evaluated = True
+                        self.put_in_transposition_table(parent.__hash__(), (depth - len(L) - 1), parent.best_move, parent.value, parent.color, "ALPHA")
                         continue
 
                 next_state = parent.next_state()
@@ -133,10 +175,13 @@ class Agent:
                         + 2 ** (depth - len(L) - 1)
                     )
                     parent.evaluated = True
+                    self.put_in_transposition_table(parent.__hash__(), (depth - len(L) - 1), parent.best_move, parent.value, parent.color, "EXACT")
 
             elif len(L) == depth + 1:
                 state.value = self.eval(state.board)
                 state.evaluated = True
+                self.nodes += 1
+                
 
             elif time.time() >= time_limit:
                 return None, None
@@ -145,7 +190,7 @@ class Agent:
                 next_state = state.next_state()
                 if next_state != state:
                     L.append(next_state)
-
+            
         return root_state.best_move, root_state.value
 
     def eval(self, state):
