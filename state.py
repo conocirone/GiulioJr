@@ -47,13 +47,15 @@ class State:
         if move is None:
             self.draw_fifo = draw_fifo
         else:
+            self.draw_fifo = draw_fifo
             if len(draw_fifo) == 4:
                 draw_fifo.pop(0)
-            self.draw_fifo = draw_fifo + [self.board.color_coords]
+            self.draw_fifo.append(self.board.color_coords)
 
 
     def __hash__(self):
-        return xor(hash(frozenset(self.board.color_coords[Color.WHITE])), hash(frozenset(self.board.color_coords[Color.BLACK])))
+        return hash(frozenset(self.board.color_coords[Color.WHITE] | self.board.color_coords[Color.BLACK] | self.board.color_coords[Color.KING] | {self.color}))
+        # return xor(hash(frozenset(self.board.color_coords[Color.WHITE])), hash(frozenset(self.board.color_coords[Color.BLACK])))
         
     def next_state(self):
         try:
@@ -82,7 +84,7 @@ class State:
             child_player,
             self.alpha,
             self.beta,
-            self.draw_fifo,
+            deepcopy(self.draw_fifo),
             self.root_color
         )
 
