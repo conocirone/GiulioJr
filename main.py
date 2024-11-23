@@ -1,7 +1,7 @@
 from gateway import Gateway
 from agent import Agent
 import argparse
-from board import Board
+from board import Board, Color
 
 
 if __name__ == "__main__":
@@ -27,4 +27,8 @@ if __name__ == "__main__":
 
     board = Board()
     gateway = Gateway(args.team, args.name, args.ip)
-    Agent(gateway, args.timeout, args.team, board)
+
+    if args.team == "WHITE":
+        Agent(gateway, args.timeout, Color.WHITE, board)
+    else:
+        Agent(gateway, args.timeout, Color.BLACK, board)

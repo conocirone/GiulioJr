@@ -1,4 +1,4 @@
-from board import Board
+from board import Board, Color, Citadels
 
 
 def piece_score(state, color):
@@ -11,21 +11,21 @@ def piece_score(state, color):
     Returns:
         int: score between -1 and 1
     """
-    white_count = len(state.color_coords["WHITE"])
-    black_count = len(state.color_coords["BLACK"])
+    white_count = len(state.color_coords[Color.WHITE])
+    black_count = len(state.color_coords[Color.BLACK])
 
     # NOTE: Assumption white piece score is 2 and black piece 1.
     score = 2 * white_count - black_count
 
     normalized_score = score / 16
 
-    if color == "WHITE":
+    if color == Color.WHITE:
         return normalized_score
-    else:
-        return -normalized_score
+    return -normalized_score
 
 
 # WHITE features
+# TODO: divide in two features
 def king_safety(state, color):
     """
     Returns safety score: number of black pieces missing for king capture
@@ -48,44 +48,61 @@ def king_safety(state, color):
         required_for_capture = 2
 
     close_blacks = 0
-    if (
-        state.coords_color.get((king_position[0] - 1, king_position[1]), None)
-        == "BLACK"
-        or Board.coords_noenter.get((king_position[0] - 1, king_position[1]), "EMPTY")
-        in "LRUD"
+
+    if state.coords_color.get(
+        (king_position[0] - 1, king_position[1]), None
+    ) == Color.BLACK or Board.coords_noenter.get(
+        (king_position[0] - 1, king_position[1]), Color.EMPTY
+    ) in (
+        Citadels.L,
+        Citadels.R,
+        Citadels.D,
+        Citadels.U,
     ):  # Up square check
         close_blacks += 1
-    if (
-        state.coords_color.get((king_position[0] + 1, king_position[1]), None)
-        == "BLACK"
-        or Board.coords_noenter.get((king_position[0] + 1, king_position[1]), "EMPTY")
-        in "LRUD"
+    if state.coords_color.get(
+        (king_position[0] + 1, king_position[1]), None
+    ) == Color.BLACK or Board.coords_noenter.get(
+        (king_position[0] + 1, king_position[1]), Color.EMPTY
+    ) in (
+        Citadels.L,
+        Citadels.R,
+        Citadels.D,
+        Citadels.U,
     ):  # Down square check
         close_blacks += 1
-    if (
-        state.coords_color.get((king_position[0], king_position[1] - 1), None)
-        == "BLACK"
-        or Board.coords_noenter.get((king_position[0], king_position[1] - 1), "EMPTY")
-        in "LRUD"
+    if state.coords_color.get(
+        (king_position[0], king_position[1] - 1), None
+    ) == Color.BLACK or Board.coords_noenter.get(
+        (king_position[0], king_position[1] - 1), Color.EMPTY
+    ) in (
+        Citadels.L,
+        Citadels.R,
+        Citadels.D,
+        Citadels.U,
     ):  # Left square check
         close_blacks += 1
-    if (
-        state.coords_color.get((king_position[0], king_position[1] + 1), None)
-        == "BLACK"
-        or Board.coords_noenter.get((king_position[0], king_position[1] + 1), "EMPTY")
-        in "LRUD"
+    if state.coords_color.get(
+        (king_position[0], king_position[1] + 1), None
+    ) == Color.BLACK or Board.coords_noenter.get(
+        (king_position[0], king_position[1] + 1), Color.EMPTY
+    ) in (
+        Citadels.L,
+        Citadels.R,
+        Citadels.D,
+        Citadels.U,
     ):  # Right square check
         close_blacks += 1
 
     normalized_score = (required_for_capture - close_blacks) / 2 - 1
-    if color == "BLACK":
+    if color == Color.BLACK:
         return -normalized_score
     return normalized_score
 
 
 def capture_king(state, color):
     if state.get_king_coords() is None:
-        if color == "WHITE":
+        if color == Color.WHITE:
             return float("-inf")
         else:
             return float("inf")
@@ -94,35 +111,8 @@ def capture_king(state, color):
 
 def win_move_king(state, color):
     king_position = state.get_king_coords()
-    found = False
     if king_position[1] in (0, 8) or king_position[0] in (0, 8):
-        if color == "WHITE":
-            return float("inf")
-        else:
-            return float("-inf")
-
-    if king_position[0] not in (2, 6) and king_position[1] not in (2, 6):
-        return 0
-
-    if king_position[0] in (2, 6):
-        for col in range(9):
-            if state.coords_color.get((king_position[0], col), None) is not None and (
-                king_position[0],
-                col,
-            ) != (king_position[0], king_position[1]):
-                found = True
-                break
-    elif king_position[1] in (2, 6):
-        for row in range(9):
-            if state.coords_color.get((row, king_position[1]), None) is not None and (
-                row,
-                king_position[1],
-            ) != (king_position[0], king_position[1]):
-                found = True
-                break
-
-    if not found:  # not found
-        if color == "WHITE":
+        if color == Color.WHITE:
             return float("inf")
         else:
             return float("-inf")
@@ -131,7 +121,7 @@ def win_move_king(state, color):
 
 def king_distance(state, color):
 
-    black_coords = state.color_coords["BLACK"]
+    black_coords = state.color_coords[Color.BLACK]
     king_position = state.get_king_coords()
 
     tr_angle = (0, 8)
@@ -220,7 +210,50 @@ def king_distance(state, color):
     # distance min value = 0, max value = 14/4
     # max value final_score = 7,5, min value = 0.25
     normalized_score = ((final_score - 0.25) / 7.25) * 2 - 1
-    if color == "BLACK":
+    if color == Color.BLACK:
         return normalized_score
-    else:
-        return -normalized_score
+    return -normalized_score
+
+
+def draw_check(state, draw_fifo):
+    if len(draw_fifo) < 4:
+        return False
+
+    draw_found = True
+    for key in (Color.KING, Color.WHITE, Color.BLACK):
+        if state[key] != draw_fifo[0][key]:
+            draw_found = False
+            break
+
+    return draw_found
+
+
+def king_free_road(state, color):
+    king_position = state.get_king_coords()
+    found = False
+    if king_position[0] not in (2, 6) and king_position[1] not in (2, 6):
+        return 0
+
+    if king_position[0] in (2, 6):
+        for col in range(9):
+            if state.coords_color.get((king_position[0], col), None) is not None and (
+                king_position[0],
+                col,
+            ) != (king_position[0], king_position[1]):
+                found = True
+                break
+    elif king_position[1] in (2, 6):
+        for row in range(9):
+            if state.coords_color.get((row, king_position[1]), None) is not None and (
+                row,
+                king_position[1],
+            ) != (king_position[0], king_position[1]):
+                found = True
+                break
+
+    if not found:  # not found
+        if color == Color.WHITE:
+            return 100
+        else:
+            return -100
+    return 0
