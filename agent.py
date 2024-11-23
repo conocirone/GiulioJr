@@ -20,6 +20,7 @@ class Agent:
         self.board = board
         self.timeout = timeout
         self.draw_fifo = []
+        self.nodes = 0
 
         # sends and receives messages
         while True:
@@ -65,12 +66,12 @@ class Agent:
         best_move = None
         max_depth = 100
         while time.time() < time_limit and depth <= max_depth:
-
             move, value = self.alphabeta_it(time_limit=time_limit, depth=depth)
-
             if move is not None:
                 best_move = move
-                print(f"{self.color.name}: depth: {depth}, value: {value:.2f}, move: {self.convert_move(best_move)}")
+                print(
+                    f"{self.color.name}: depth: {depth}, value: {value}, nodes: {self.nodes}, move: {self.convert_move(best_move)}"
+                )
                 depth += 1
 
         if best_move is None:
@@ -88,7 +89,8 @@ class Agent:
             float("-inf"),
             float("inf"),
             self.draw_fifo,
-            self.color
+            self.color,
+            0,  # Root state depth
         )
         L = [root_state]
 
@@ -107,8 +109,11 @@ class Agent:
                     parent.alpha = max(parent.alpha, parent.value)
                     if parent.alpha >= parent.beta:
                         Board.history_table[parent.color.value][parent.best_move] = (
-                            Board.history_table[parent.color.value].get(parent.best_move, 0)
-                            + 2 ** (depth - len(L) - 1)
+                            Board.history_table[parent.color.value].get(
+                                parent.best_move, 0
+                            )
+                            + 2**depth
+                            - (len(L) - 1)
                         )
                         parent.evaluated = True
                         continue
@@ -119,8 +124,11 @@ class Agent:
                     parent.beta = min(parent.beta, parent.value)
                     if parent.alpha >= parent.beta:
                         Board.history_table[parent.color.value][parent.best_move] = (
-                            Board.history_table[parent.color.value].get(parent.best_move, 0)
-                            + 2 ** (depth - len(L) - 1)
+                            Board.history_table[parent.color.value].get(
+                                parent.best_move, 0
+                            )
+                            + 2**depth
+                            - (len(L) - 1)
                         )
                         parent.evaluated = True
                         continue
@@ -131,13 +139,15 @@ class Agent:
                 else:
                     Board.history_table[parent.color.value][parent.best_move] = (
                         Board.history_table[parent.color.value].get(parent.best_move, 0)
-                        + 2 ** (depth - len(L) - 1)
+                        + 2**depth
+                        - (len(L) - 1)
                     )
                     parent.evaluated = True
 
             elif len(L) == depth + 1:
-                state.value = self.eval(state.board)
+                state.value = self.eval(state.board, depth + 1)
                 state.evaluated = True
+                self.nodes += 1
 
             elif time.time() >= time_limit:
                 return None, None
@@ -149,8 +159,8 @@ class Agent:
 
         return root_state.best_move, root_state.value
 
-    def eval(self, state):
-        kfr = king_free_road(state, self.color)
+    def eval(self, state, depth):
+        kfr = king_free_road(state, self.color, depth)
         if kfr != 0:
             return kfr
 

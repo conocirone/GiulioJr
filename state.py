@@ -12,7 +12,19 @@ class Player(Enum):
 
 class State:
 
-    def __init__(self, board, move, value, color, player, alpha, beta, draw_fifo, root_color):
+    def __init__(
+        self,
+        board,
+        move,
+        value,
+        color,
+        player,
+        alpha,
+        beta,
+        draw_fifo,
+        root_color,
+        depth,
+    ):
         self.board = board
         self.value = value
         self.color = color
@@ -24,14 +36,15 @@ class State:
         self.available_moves_iterator = iter(self.board.get_available_moves(self.color))
         self.evaluated = False
         self.root_color = root_color
+        self.depth = depth  # State depth in search tree
 
-        ck = capture_king(self.board, root_color)
+        ck = capture_king(self.board, root_color, depth)
         if ck != 0:
             self.value = ck
             self.evaluated = True
             return
 
-        wmk = win_move_king(self.board, root_color)
+        wmk = win_move_king(self.board, root_color, depth)
         if wmk != 0:
             self.value = wmk
             self.evaluated = True
@@ -69,7 +82,6 @@ class State:
         else:
             child_color = Color.WHITE
 
-
         return State(
             self.do_move(self, next_move),
             next_move,
@@ -79,7 +91,8 @@ class State:
             self.alpha,
             self.beta,
             deepcopy(self.draw_fifo),
-            self.root_color
+            self.root_color,
+            self.depth + 1,
         )
 
     @staticmethod
@@ -87,4 +100,3 @@ class State:
         new_board = deepcopy(self.board)
         new_board.move_piece(move)
         return new_board
-
