@@ -69,3 +69,17 @@ class TestBoard(unittest.TestCase):
         moves_black = b.get_available_moves(Color.BLACK)
         self.assertTrue((1, 5, 2, 5) in moves_black)  # black captures king
         self.assertEqual(len(moves_black), 18)
+
+    def test_history_table(self):
+        b = Board()
+        b.color_coords[Color.WHITE] = {(8, 2)}
+        b.coords_color[(8, 2)] = Color.WHITE
+
+        b.history_table[Color.WHITE][(8, 2, 8, 1)] = 1
+        b.history_table[Color.WHITE][(8, 2, 8, 0)] = 2
+        b.history_table[Color.WHITE][(8, 2, 0, 2)] = 3
+
+        white_moves = b.get_available_moves(Color.WHITE)
+        self.assertEqual(white_moves[0], (8, 2, 0, 2))
+        self.assertEqual(white_moves[1], (8, 2, 8, 0))
+        self.assertEqual(white_moves[2], (8, 2, 8, 1))
