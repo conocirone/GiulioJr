@@ -119,7 +119,7 @@ def win_move_king(state, color):
     return 0
 
 
-def king_distance(state, color):
+def king_distance(state, color, distance_factor):
 
     black_coords = state.color_coords[Color.BLACK]
     king_position = state.get_king_coords()
@@ -198,10 +198,10 @@ def king_distance(state, color):
     # distance/4 -> to test
     final_score = min(
         (
-            dist_tr / 4 + count_q_tr,
-            dist_tl / 4 + count_q_tl,
-            dist_br / 4 + count_q_br,
-            dist_bl / 4 + count_q_bl,
+            dist_tr / distance_factor + count_q_tr,
+            dist_tl / distance_factor + count_q_tl,
+            dist_br / distance_factor + count_q_br,
+            dist_bl / distance_factor + count_q_bl,
         )
     )
 

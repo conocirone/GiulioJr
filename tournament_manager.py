@@ -4,15 +4,17 @@ import subprocess
 import time
 from threading import Semaphore, Thread
 import pandas as pd
+import numpy as np
 
 server_port = 10000
-timeout = 1
+timeout = 60
 threads = []
 results = pd.DataFrame(
     columns=[
         "piece_score",
         "king_safety",
         "king_distance",
+        "distance_factor",
         "WHITE_WIN",
         "WHITE_LOSE",
         "BLACK_WIN",
@@ -58,7 +60,8 @@ def start_results(server_port, white_args, black_args, timeout):
                 --port {server_port} \
                 --weights {white_args['piece_score']} \
                           {white_args['king_safety']} \
-                          {white_args['king_distance']}""",
+                          {white_args['king_distance']} \
+                          {white_args['distance_factor']}""",
             shell=True,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
@@ -75,7 +78,8 @@ def start_results(server_port, white_args, black_args, timeout):
                 --port {server_port+1} \
                 --weights {black_args['piece_score']} \
                           {black_args['king_safety']} \
-                          {black_args['king_distance']}""",
+                          {black_args['king_distance']} \
+                          {black_args['distance_factor']}""",
             shell=True,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
@@ -93,7 +97,7 @@ def start_results(server_port, white_args, black_args, timeout):
         # WHITE wins
         if (
             not white_args_df.isin(
-                results[["piece_score", "king_safety", "king_distance"]]
+                results[["piece_score", "king_safety", "king_distance", "distance_factor"]]
             )
             .any()
             .any()
@@ -113,7 +117,7 @@ def start_results(server_port, white_args, black_args, timeout):
         # BLACK loses
         if (
             not black_args_df.isin(
-                results[["piece_score", "king_safety", "king_distance"]]
+                results[["piece_score", "king_safety", "king_distance", "distance_factor"]]
             )
             .any()
             .any()
@@ -134,7 +138,7 @@ def start_results(server_port, white_args, black_args, timeout):
         # BLACK wins
         if (
             not black_args_df.isin(
-                results[["piece_score", "king_safety", "king_distance"]]
+                results[["piece_score", "king_safety", "king_distance", "distance_factor"]]
             )
             .any()
             .any()
@@ -153,7 +157,7 @@ def start_results(server_port, white_args, black_args, timeout):
         # WHITE loses
         if (
             not white_args_df.isin(
-                results[["piece_score", "king_safety", "king_distance"]]
+                results[["piece_score", "king_safety", "king_distance", "distance_factor"]]
             )
             .any()
             .any()
@@ -173,7 +177,7 @@ def start_results(server_port, white_args, black_args, timeout):
         # DRAW
         if (
             not white_args_df.isin(
-                results[["piece_score", "king_safety", "king_distance"]]
+                results[["piece_score", "king_safety", "king_distance", "distance_factor"]]
             )
             .any()
             .any()
@@ -190,7 +194,7 @@ def start_results(server_port, white_args, black_args, timeout):
                 results.loc[white_args_df.index, "WHITE_DRAW"] + 1)
         if (
             not black_args_df.isin(
-                results[["piece_score", "king_safety", "king_distance"]]
+                results[["piece_score", "king_safety", "king_distance", "distance_factor"]]
             )
             .any()
             .any()
@@ -213,17 +217,19 @@ def start_results(server_port, white_args, black_args, timeout):
 
 
 # Generate all possible parameter combination
-def get_all_weights_combos(weight_list_size, high):
-    if weight_list_size == 1:
-        return [[high]]
-    res = []
-    for i in range(1, high):
-        for weight_combo in get_all_weights_combos(weight_list_size - 1, high - i):
-            res.append([i] + weight_combo)
-    return res
+# def get_all_weights_combos(weight_list_size, high):
+#     if weight_list_size == 1:
+#         return [[high]]
+#     res = []
+#     for i in range(1, high):
+#         for weight_combo in get_all_weights_combos(weight_list_size - 1, high - i):
+#             res.append([i] + weight_combo)
+#     return res
+# weight_combos = get_all_weights_combos(3, 10)
 
-
-weight_combos = get_all_weights_combos(3, 10)
+weight_combos = []
+for distance_factor in np.linspace(2,4,10):
+    weight_combos.append([3,1,6,distance_factor])
 
 
 for i in range(len(weight_combos)):
@@ -239,11 +245,13 @@ for i in range(len(weight_combos)):
                     "piece_score": combo1[0],
                     "king_safety": combo1[1],
                     "king_distance": combo1[2],
+                    "distance_factor": combo1[3],
                 },
                 {
                     "piece_score": combo2[0],
                     "king_safety": combo2[1],
                     "king_distance": combo2[2],
+                    "distance_factor": combo2[3],
                 },
                 timeout,
             ),
@@ -257,11 +265,13 @@ for i in range(len(weight_combos)):
                     "piece_score": combo2[0],
                     "king_safety": combo2[1],
                     "king_distance": combo2[2],
+                    "distance_factor": combo2[3],
                 },
                 {
                     "piece_score": combo1[0],
                     "king_safety": combo1[1],
                     "king_distance": combo1[2],
+                    "distance_factor": combo1[3],
                 },
                 timeout,
             ),

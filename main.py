@@ -27,7 +27,7 @@ if __name__ == "__main__":
         "--port", help="Port of the player", type=int, default=5800
     )
     argparse.add_argument(
-        "--weights", help="Weights for player", nargs=3,type=int, default=5800
+        "--weights", help="Weights for player", nargs=4,type=float, default=5800
     )
     args = argparse.parse_args()
 
