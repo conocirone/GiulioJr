@@ -17,7 +17,8 @@ results = pd.DataFrame(
         "WHITE_LOSE",
         "BLACK_WIN",
         "BLACK_LOSE",
-        "DRAW",
+        "WHITE_DRAW",
+        "BLACK_DRAW",
     ]
 )
 port_offset = 0
@@ -102,7 +103,8 @@ def start_results(server_port, white_args, black_args, timeout):
             results.loc[white_args_df.index, "WHITE_LOSE"] = 0
             results.loc[white_args_df.index, "BLACK_WIN"] = 0
             results.loc[white_args_df.index, "BLACK_LOSE"] = 0
-            results.loc[white_args_df.index, "DRAW"] = 0
+            results.loc[white_args_df.index, "WHITE_DRAW"] = 0
+            results.loc[white_args_df.index, "BLACK_DRAW"] = 0
         else:
             results.loc[white_args_df.index, "WHITE_WIN"] = (
                 results.loc[white_args_df.index, "WHITE_WIN"] + 1
@@ -121,7 +123,8 @@ def start_results(server_port, white_args, black_args, timeout):
             results.loc[black_args_df.index, "WHITE_LOSE"] = 0
             results.loc[black_args_df.index, "BLACK_WIN"] = 0
             results.loc[black_args_df.index, "BLACK_LOSE"] = 1
-            results.loc[black_args_df.index, "DRAW"] = 0
+            results.loc[black_args_df.index, "WHITE_DRAW"] = 0
+            results.loc[black_args_df.index, "BLACK_DRAW"] = 0
         else:
             results.loc[black_args_df.index, "BLACK_LOSE"] = (
                 results.loc[black_args_df.index, "BLACK_LOSE"] + 1
@@ -141,7 +144,8 @@ def start_results(server_port, white_args, black_args, timeout):
             results.loc[black_args_df.index, "WHITE_LOSE"] = 0
             results.loc[black_args_df.index, "BLACK_WIN"] = 1
             results.loc[black_args_df.index, "BLACK_LOSE"] = 0
-            results.loc[black_args_df.index, "DRAW"] = 0
+            results.loc[black_args_df.index, "WHITE_DRAW"] = 0
+            results.loc[black_args_df.index, "BLACK_DRAW"] = 0
         else:
             results.loc[black_args_df.index, "BLACK_WIN"] = (
                 results.loc[black_args_df.index, "BLACK_WIN"] + 1
@@ -159,7 +163,8 @@ def start_results(server_port, white_args, black_args, timeout):
             results.loc[white_args_df.index, "WHITE_LOSE"] = 1
             results.loc[white_args_df.index, "BLACK_WIN"] = 0
             results.loc[white_args_df.index, "BLACK_LOSE"] = 0
-            results.loc[white_args_df.index, "DRAW"] = 0
+            results.loc[white_args_df.index, "WHITE_DRAW"] = 0
+            results.loc[white_args_df.index, "BLACK_DRAW"] = 0
         else:
             results.loc[white_args_df.index, "WHITE_LOSE"] = (
                 results.loc[white_args_df.index, "WHITE_LOSE"] + 1
@@ -178,11 +183,11 @@ def start_results(server_port, white_args, black_args, timeout):
             results.loc[white_args_df.index, "WHITE_LOSE"] = 0
             results.loc[white_args_df.index, "BLACK_WIN"] = 0
             results.loc[white_args_df.index, "BLACK_LOSE"] = 0
-            results.loc[white_args_df.index, "DRAW"] = 1
+            results.loc[white_args_df.index, "WHITE_DRAW"] = 1
+            results.loc[white_args_df.index, "BLACK_DRAW"] = 0
         else:
-            results.loc[white_args_df.index, "DRAW"] = (
-                results.loc[white_args_df.index, "DRAW"] + 1
-            )
+            results.loc[white_args_df.index, "WHITE_DRAW"] = (
+                results.loc[white_args_df.index, "WHITE_DRAW"] + 1)
         if (
             not black_args_df.isin(
                 results[["piece_score", "king_safety", "king_distance"]]
@@ -195,10 +200,11 @@ def start_results(server_port, white_args, black_args, timeout):
             results.loc[black_args_df.index, "WHITE_LOSE"] = 0
             results.loc[black_args_df.index, "BLACK_WIN"] = 0
             results.loc[black_args_df.index, "BLACK_LOSE"] = 0
-            results.loc[black_args_df.index, "DRAW"] = 1
+            results.loc[black_args_df.index, "WHITE_DRAW"] = 0
+            results.loc[black_args_df.index, "BLACK_DRAW"] = 1
         else:
-            results.loc[black_args_df.index, "DRAW"] = (
-                results.loc[black_args_df.index, "DRAW"] + 1
+            results.loc[black_args_df.index, "BLACK_DRAW"] = (
+                results.loc[black_args_df.index, "BLACK_DRAW"] + 1
             )
 
     results_semaphore.release()
