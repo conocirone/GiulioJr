@@ -1,6 +1,7 @@
 from enum import Enum
 from copy import deepcopy
 from board import Color
+from operator import xor
 
 from features import win_move_king, capture_king, draw_check
 
@@ -51,6 +52,11 @@ class State:
                 draw_fifo.pop(0)
             self.draw_fifo.append(self.board.color_coords)
 
+
+    def __hash__(self):
+        return hash(frozenset(self.board.color_coords[Color.WHITE] | self.board.color_coords[Color.BLACK] | self.board.color_coords[Color.KING] | {self.color}))
+        # return xor(hash(frozenset(self.board.color_coords[Color.WHITE])), hash(frozenset(self.board.color_coords[Color.BLACK])))
+        
     def next_state(self):
         try:
             next_move = next(self.available_moves_iterator)
