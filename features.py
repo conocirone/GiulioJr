@@ -24,8 +24,6 @@ def piece_score(state, color):
     return -normalized_score
 
 
-# WHITE features
-# TODO: divide in two features
 def king_safety(state, color):
     """
     Returns safety score: number of black pieces missing for king capture
@@ -100,25 +98,26 @@ def king_safety(state, color):
     return normalized_score
 
 
-def capture_king(state, color):
+def capture_king(state, color, depth):
     if state.get_king_coords() is None:
         if color == Color.WHITE:
-            return float("-inf")
+            return -200 + depth
         else:
-            return float("inf")
+            return 200 - depth
     return 0
 
 
-def win_move_king(state, color):
+def win_move_king(state, color, depth):
     king_position = state.get_king_coords()
     if king_position[1] in (0, 8) or king_position[0] in (0, 8):
         if color == Color.WHITE:
-            return float("inf")
+            return 200 - depth
         else:
-            return float("-inf")
+            return -200 + depth
     return 0
 
 
+# TODO: divide in two features
 def king_distance(state, color):
 
     black_coords = state.color_coords[Color.BLACK]
@@ -228,7 +227,7 @@ def draw_check(state, draw_fifo):
     return draw_found
 
 
-def king_free_road(state, color):
+def king_free_road(state, color, depth):
     king_position = state.get_king_coords()
     found = False
     if king_position[0] not in (2, 6) and king_position[1] not in (2, 6):
@@ -253,7 +252,7 @@ def king_free_road(state, color):
 
     if not found:  # not found
         if color == Color.WHITE:
-            return 100
+            return 100 - depth
         else:
-            return -100
+            return -100 + depth
     return 0
