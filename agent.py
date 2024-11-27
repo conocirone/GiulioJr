@@ -13,7 +13,6 @@ from features import (
     win_move_king,
 )
 from state import State, Player
-import random
 
 
 class Agent:
@@ -56,8 +55,8 @@ class Agent:
                 conv_move = self.convert_move(move)
                 self.gateway.send_state(conv_move)
 
-                if ((self.color == Color.WHITE and win_move_king(chosen_board, self.color) == float('inf')) or 
-                    (self.color == Color.BLACK and capture_king(chosen_board, self.color) == float('inf'))
+                if ((self.color == Color.WHITE and abs(win_move_king(chosen_board, self.color, 0)) == 1000) or 
+                    (self.color == Color.BLACK and abs(capture_king(chosen_board,  self.color, 0)) == 1000)
                    ):
                     print(f"{self.color.name} I won!")
                     sys.exit(0)
@@ -105,7 +104,7 @@ class Agent:
     def iterative_deepening(self, time_limit):
         depth = 1
         best_move = None
-        max_depth = 100
+        max_depth = 5
         while time.time() < time_limit and depth <= max_depth:
             move, value = self.alphabeta_it(time_limit=time_limit, depth=depth)
             if move is not None:

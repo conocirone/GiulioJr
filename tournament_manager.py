@@ -6,7 +6,7 @@ from threading import Semaphore, Thread
 import pandas as pd
 
 server_port = 10000
-timeout = 1
+timeout = 60
 threads = []
 results = pd.DataFrame(
     columns=[
@@ -26,6 +26,16 @@ port_offset = 0
 results_semaphore = Semaphore(1)
 # Semaphore for matching: allocate a match for each free cpu
 cpu_semaphore = Semaphore(cpu_count())
+# Generate all possible parameter combination
+def get_all_weights_combos(weight_list_size, high):
+    if weight_list_size == 1:
+        return [[high]]
+    res = []
+    for i in range(1, high):
+        for weight_combo in get_all_weights_combos(weight_list_size - 1, high - i):
+            res.append([i] + weight_combo)
+    return res
+weight_combos = get_all_weights_combos(3, 10)
 
 
 def start_results(server_port, white_args, black_args, timeout):
@@ -39,7 +49,7 @@ def start_results(server_port, white_args, black_args, timeout):
     # Create a SERVER subprocess (suppress stderr and stdout)
     processes.append(
         subprocess.Popen(
-            f"java -jar server.jar -p {server_port}",
+            f"java -jar server.jar -p  {server_port}",
             shell=True,
             stdout=subprocess.DEVNULL,
             stderr=subprocess.DEVNULL,
@@ -212,18 +222,6 @@ def start_results(server_port, white_args, black_args, timeout):
     cpu_semaphore.release()
 
 
-# Generate all possible parameter combination
-def get_all_weights_combos(weight_list_size, high):
-    if weight_list_size == 1:
-        return [[high]]
-    res = []
-    for i in range(1, high):
-        for weight_combo in get_all_weights_combos(weight_list_size - 1, high - i):
-            res.append([i] + weight_combo)
-    return res
-
-
-weight_combos = get_all_weights_combos(3, 10)
 
 
 for i in range(len(weight_combos)):
