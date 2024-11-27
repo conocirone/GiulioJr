@@ -14,13 +14,14 @@ import random
 
 
 class Agent:
-    def __init__(self, gateway, timeout, color, board):
+    def __init__(self, gateway, timeout, color, board, weights):
         self.gateway = gateway
         self.gateway.set_agent(self)
         self.color = color
         self.board = board
         self.timeout = timeout
         self.draw_fifo = []
+        self.weights = weights
         #initialize with random values
         self.transposition_table = {}
         self.transposition_table_size = 2**16
@@ -204,8 +205,8 @@ class Agent:
 
         # Feature linear combination
         s = 0
-        s += 25 * piece_score(state, self.color)
-        s += 5 * king_safety(state, self.color)
-        s += 8 * king_distance(state, self.color)
+        s += self.weights[0] * piece_score(state, self.color)
+        s += self.weights[1] * king_safety(state, self.color)
+        s += self.weights[2] * king_distance(state, self.color)
         # other features
         return s
