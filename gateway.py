@@ -5,7 +5,7 @@ import sys
 
 
 class Gateway:
-    def __init__(self, color, name, server_ip):
+    def __init__(self, color, name, server_ip, port):
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         self.color = color
@@ -15,10 +15,10 @@ class Gateway:
         # Connection
         if self.color == "WHITE":
             # Connect the socket to the port where the server is listening
-            server_address = (self.server_ip, 5800)
+            server_address = (self.server_ip, port)
         elif self.color == "BLACK":
             # Connect the socket to the port where the server is listening
-            server_address = (self.server_ip, 5801)
+            server_address = (self.server_ip, port)
         else:
             raise ConnectionError("Player must be WHITE or BLACK!")
 
