@@ -23,17 +23,15 @@ if __name__ == "__main__":
     argparse.add_argument(
         "--timeout", help="The timeout for the server", type=int, default=60
     )
+    
     argparse.add_argument(
-        "--port", help="Port of the player", type=int, default=5800
+        "--weights", help="Weights for the evaluation function", type=int, nargs=3, default=[25, 5, 8]
     )
-    argparse.add_argument(
-        "--weights", help="Weights for player", nargs=3,type=int, default=5800
-    )
-
+    
     args = argparse.parse_args()
 
     board = Board()
-    gateway = Gateway(args.team, args.name, args.ip, args.port)
+    gateway = Gateway(args.team, args.name, args.ip)
 
     if args.team == "WHITE":
         Agent(gateway, args.timeout, Color.WHITE, board, args.weights)

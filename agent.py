@@ -1,16 +1,13 @@
 import time
 import copy
-import sys
 
 
-from board import Board, Color
+from board import Board
 from features import (
-    capture_king,
     piece_score,
     king_safety,
     king_distance,
     king_free_road,
-    win_move_king,
 )
 from state import State, Player
 import random
@@ -30,6 +27,7 @@ class Agent:
         self.transposition_table_size = 2**16
         self.nodes = 0
         self.cache_hits = 0
+        self.nodes = 0
 
         # sends and receives messages
         while True:
@@ -45,6 +43,8 @@ class Agent:
                 # Define depth, timeout percentage
                 move = self.iterative_deepening(time.time() + self.timeout * 0.95)
 
+                conv_move = self.convert_move(move)
+                self.gateway.send_state(conv_move)
 
                 # Updating draw FIFO
                 chosen_board = copy.deepcopy(self.board)
@@ -52,15 +52,6 @@ class Agent:
                 if len(self.draw_fifo) == 4:
                     self.draw_fifo.pop(0)
                 self.draw_fifo.append(chosen_board.color_coords)
-                
-                conv_move = self.convert_move(move)
-                self.gateway.send_state(conv_move)
-
-                if ((self.color == Color.WHITE and win_move_king(chosen_board, self.color) == float('inf')) or 
-                    (self.color == Color.BLACK and capture_king(chosen_board, self.color) == float('inf'))
-                   ):
-                    print(f"{self.color.name} I won!")
-                    sys.exit(0)
 
                 print("Waiting opponent:\n")
 
