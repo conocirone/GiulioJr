@@ -197,10 +197,10 @@ def king_distance(state, color):
     # distance/4 -> to test
     final_score = min(
         (
-            dist_tr / 4 + count_q_tr,
-            dist_tl / 4 + count_q_tl,
-            dist_br / 4 + count_q_br,
-            dist_bl / 4 + count_q_bl,
+            dist_tr / 2.7 + count_q_tr,
+            dist_tl / 2.7 + count_q_tl,
+            dist_br / 2.7 + count_q_br,
+            dist_bl / 2.7 + count_q_bl,
         )
     )
 
@@ -208,7 +208,7 @@ def king_distance(state, color):
     # max valuer count_q = 4, min value = 0
     # distance min value = 0, max value = 14/4
     # max value final_score = 7,5, min value = 0.25
-    normalized_score = ((final_score - 0.25) / 7.25) * 2 - 1
+    normalized_score = ((final_score - 0.74) / 9.18) * 2 - 1
     if color == Color.BLACK:
         return normalized_score
     return -normalized_score
