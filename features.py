@@ -14,10 +14,10 @@ def piece_score(state, color):
     white_count = len(state.color_coords[Color.WHITE])
     black_count = len(state.color_coords[Color.BLACK])
 
-    # NOTE: Assumption white piece score is 2 and black piece 1.
-    score = 2 * white_count - black_count
+    # NOTE: Assumption white piece score is  and black piece 1.
+    score = white_count - black_count
 
-    normalized_score = score / 16
+    normalized_score = (score + 16 / 12) -1
 
     if color == Color.WHITE:
         return normalized_score
@@ -101,9 +101,9 @@ def king_safety(state, color):
 def capture_king(state, color, depth):
     if state.get_king_coords() is None:
         if color == Color.WHITE:
-            return -200 + depth
+            return -1000 + depth
         else:
-            return 200 - depth
+            return 1000 - depth
     return 0
 
 
@@ -111,9 +111,9 @@ def win_move_king(state, color, depth):
     king_position = state.get_king_coords()
     if king_position[1] in (0, 8) or king_position[0] in (0, 8):
         if color == Color.WHITE:
-            return 200 - depth
+            return 1000 - depth
         else:
-            return -200 + depth
+            return -1000 + depth
     return 0
 
 
@@ -252,7 +252,7 @@ def king_free_road(state, color, depth):
 
     if not found:  # not found
         if color == Color.WHITE:
-            return 100 - depth
+            return 500 - depth
         else:
-            return -100 + depth
+            return -500 + depth
     return 0
