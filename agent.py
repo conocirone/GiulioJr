@@ -24,15 +24,13 @@ class Agent:
         self.board = board
         self.timeout = timeout
         self.draw_fifo = []
+        self.weights = weights
         #initialize with random values
         self.transposition_table = {}
         self.transposition_table_size = 2**16
         self.nodes = 0
         self.cache_hits = 0
 
-        # Weight parameters
-        self.weights = weights
-        
         # sends and receives messages
         while True:
             current_state, turn = gateway.get_state()
@@ -133,7 +131,8 @@ class Agent:
             float("-inf"),
             float("inf"),
             self.draw_fifo,
-            self.color
+            self.color,
+            0,  # Root state depth
         )
         L = [root_state]
         
@@ -156,7 +155,7 @@ class Agent:
                 parent = L[-1]
 
                 if parent.player == Player.MAX:
-                    if state.value >= parent.value:
+                    if state.value > parent.value:
                         parent.value = state.value
                         parent.best_move = state.move
                     parent.alpha = max(parent.alpha, parent.value)
@@ -169,7 +168,7 @@ class Agent:
                         self.put_in_transposition_table(parent.__hash__(), depth - (len(L) - 1), parent.best_move, parent.value, "BETA")
                         continue
                 else:
-                    if state.value <= parent.value:
+                    if state.value < parent.value:
                         parent.value = state.value
                         parent.best_move = state.move
                     parent.beta = min(parent.beta, parent.value)
@@ -194,10 +193,9 @@ class Agent:
                     self.put_in_transposition_table(parent.__hash__(), depth - (len(L) - 1), parent.best_move, parent.value, "EXACT")
 
             elif len(L) == depth + 1:
-                state.value = self.eval(state.board)
+                state.value = self.eval(state.board, depth + 1)
                 state.evaluated = True
                 self.nodes += 1
-                
 
             elif time.time() >= time_limit:
                 return None, None
@@ -209,8 +207,8 @@ class Agent:
             
         return root_state.best_move, root_state.value
 
-    def eval(self, state):
-        kfr = king_free_road(state, self.color)
+    def eval(self, state, depth):
+        kfr = king_free_road(state, self.color, depth)
         if kfr != 0:
             return kfr
 

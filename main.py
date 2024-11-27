@@ -29,6 +29,7 @@ if __name__ == "__main__":
     argparse.add_argument(
         "--weights", help="Weights for player", nargs=3,type=int, default=5800
     )
+
     args = argparse.parse_args()
 
     board = Board()

@@ -14,18 +14,16 @@ def piece_score(state, color):
     white_count = len(state.color_coords[Color.WHITE])
     black_count = len(state.color_coords[Color.BLACK])
 
-    # NOTE: Assumption white piece score is 2 and black piece 1.
-    score = 2 * white_count - black_count
+    # NOTE: Assumption white piece score is  and black piece 1.
+    score = white_count - black_count
 
-    normalized_score = score / 16
+    normalized_score = (score + 16 / 12) -1
 
     if color == Color.WHITE:
         return normalized_score
     return -normalized_score
 
 
-# WHITE features
-# TODO: divide in two features
 def king_safety(state, color):
     """
     Returns safety score: number of black pieces missing for king capture
@@ -100,25 +98,26 @@ def king_safety(state, color):
     return normalized_score
 
 
-def capture_king(state, color):
+def capture_king(state, color, depth):
     if state.get_king_coords() is None:
         if color == Color.WHITE:
-            return float("-inf")
+            return -1000 + depth
         else:
-            return float("inf")
+            return 1000 - depth
     return 0
 
 
-def win_move_king(state, color):
+def win_move_king(state, color, depth):
     king_position = state.get_king_coords()
     if king_position[1] in (0, 8) or king_position[0] in (0, 8):
         if color == Color.WHITE:
-            return float("inf")
+            return 1000 - depth
         else:
-            return float("-inf")
+            return -1000 + depth
     return 0
 
 
+# TODO: divide in two features
 def king_distance(state, color):
 
     black_coords = state.color_coords[Color.BLACK]
@@ -198,10 +197,10 @@ def king_distance(state, color):
     # distance/4 -> to test
     final_score = min(
         (
-            dist_tr / 4 + count_q_tr,
-            dist_tl / 4 + count_q_tl,
-            dist_br / 4 + count_q_br,
-            dist_bl / 4 + count_q_bl,
+            dist_tr / 2.7 + count_q_tr,
+            dist_tl / 2.7 + count_q_tl,
+            dist_br / 2.7 + count_q_br,
+            dist_bl / 2.7 + count_q_bl,
         )
     )
 
@@ -209,7 +208,7 @@ def king_distance(state, color):
     # max valuer count_q = 4, min value = 0
     # distance min value = 0, max value = 14/4
     # max value final_score = 7,5, min value = 0.25
-    normalized_score = ((final_score - 0.25) / 7.25) * 2 - 1
+    normalized_score = ((final_score - 0.74) / 9.18) * 2 - 1
     if color == Color.BLACK:
         return normalized_score
     return -normalized_score
@@ -228,7 +227,7 @@ def draw_check(state, draw_fifo):
     return draw_found
 
 
-def king_free_road(state, color):
+def king_free_road(state, color, depth):
     king_position = state.get_king_coords()
     found = False
     if king_position[0] not in (2, 6) and king_position[1] not in (2, 6):
@@ -253,7 +252,7 @@ def king_free_road(state, color):
 
     if not found:  # not found
         if color == Color.WHITE:
-            return 100
+            return 500 - depth
         else:
-            return -100
+            return -500 + depth
     return 0
