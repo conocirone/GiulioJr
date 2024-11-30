@@ -4,4 +4,4 @@ if [[ $# -ne 3 ]] ; then
     exit 1
 fi
 
-python3 main.py --team "$1" --timeout "$2" --ip "$3"
+python3 /home/tablut/tablut/main.py --team "$1" --timeout "$2" --ip "$3"
