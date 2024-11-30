@@ -14,19 +14,21 @@ import random
 
 
 class Agent:
-    def __init__(self, gateway, timeout, color, board):
+    def __init__(self, gateway, timeout, color, board, weights):
         self.gateway = gateway
         self.gateway.set_agent(self)
         self.color = color
         self.board = board
         self.timeout = timeout
         self.draw_fifo = []
+        self.weights = weights
         #initialize with random values
         self.transposition_table = {}
         self.transposition_table_size = 2**16
         self.nodes = 0
         self.cache_hits = 0
-        
+        self.nodes = 0
+
         # sends and receives messages
         while True:
             current_state, turn = gateway.get_state()
@@ -120,7 +122,8 @@ class Agent:
             float("-inf"),
             float("inf"),
             self.draw_fifo,
-            self.color
+            self.color,
+            0,  # Root state depth
         )
         L = [root_state]
         
@@ -181,10 +184,9 @@ class Agent:
                     self.put_in_transposition_table(parent.__hash__(), depth - (len(L) - 1), parent.best_move, parent.value, "EXACT")
 
             elif len(L) == depth + 1:
-                state.value = self.eval(state.board)
+                state.value = self.eval(state.board, depth + 1)
                 state.evaluated = True
                 self.nodes += 1
-                
 
             elif time.time() >= time_limit:
                 return None, None
@@ -196,15 +198,15 @@ class Agent:
             
         return root_state.best_move, root_state.value
 
-    def eval(self, state):
-        kfr = king_free_road(state, self.color)
+    def eval(self, state, depth):
+        kfr = king_free_road(state, self.color, depth)
         if kfr != 0:
             return kfr
 
         # Feature linear combination
         s = 0
-        s += 0.3 * piece_score(state, self.color)
-        s += 0.1 * king_safety(state, self.color)
-        s += 0.6 * king_distance(state, self.color)
+        s += self.weights[0] * piece_score(state, self.color)
+        s += self.weights[1] * king_safety(state, self.color)
+        s += self.weights[2] * king_distance(state, self.color)
         # other features
         return s
