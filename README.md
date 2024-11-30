@@ -1,4 +1,4 @@
-# Tablut Player for AI Competition
+# Tablut Player for University Competition
 
 This repository contains a Python-based player developed for the **Tablut Competition** held as part of the course *Fundamentals of Artificial Intelligence and Knowledge Representation* at the **University of Bologna**, Academic Year 2024/2025.
 
